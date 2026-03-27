@@ -9,6 +9,19 @@ interface FreeRect {
 	bottomEdge: boolean;
 }
 
+interface Sheet {
+	freeRects: FreeRect[];
+	placed: PlacedPiece[];
+}
+
+interface ExpandedPiece {
+	id: string;
+	label: string;
+	width: number;
+	height: number;
+	color: string;
+}
+
 interface Placement {
 	sheetIndex: number;
 	rectIndex: number;
@@ -21,11 +34,11 @@ interface Placement {
 }
 
 export function calculateCutlist(pieces: PieceDefinition[], config: SheetConfig): CutlistResult {
-	const expanded = expandPieces(pieces);
-	// Sort by area descending (largest first)
-	expanded.sort((a, b) => b.width * b.height - a.width * a.height);
+	const expanded = expandPieces(pieces).toSorted(
+		(a, b) => b.width * b.height - a.width * a.height
+	);
 
-	const sheets: { freeRects: FreeRect[]; placed: PlacedPiece[] }[] = [];
+	const sheets: Sheet[] = [];
 	const unfitPieces: PieceDefinition[] = [];
 
 	for (const piece of expanded) {
@@ -87,10 +100,8 @@ export function calculateCutlist(pieces: PieceDefinition[], config: SheetConfig)
 	};
 }
 
-function expandPieces(
-	pieces: PieceDefinition[]
-): { id: string; label: string; width: number; height: number; color: string }[] {
-	const result: { id: string; label: string; width: number; height: number; color: string }[] = [];
+function expandPieces(pieces: PieceDefinition[]): ExpandedPiece[] {
+	const result: ExpandedPiece[] = [];
 	for (const piece of pieces) {
 		if (piece.width <= 0 || piece.height <= 0 || piece.quantity <= 0) continue;
 		for (let i = 0; i < piece.quantity; i++) {
@@ -121,7 +132,7 @@ function fitsInRect(
 
 function findBestPlacement(
 	piece: { width: number; height: number },
-	sheets: { freeRects: FreeRect[]; placed: PlacedPiece[] }[],
+	sheets: Sheet[],
 	config: SheetConfig
 ): Placement | null {
 	let best: Placement | null = null;
@@ -175,7 +186,7 @@ function findBestPlacement(
 function placePiece(
 	piece: { id: string; label: string; color: string },
 	placement: Placement,
-	sheets: { freeRects: FreeRect[]; placed: PlacedPiece[] }[],
+	sheets: Sheet[],
 	config: SheetConfig
 ): void {
 	const sheet = sheets[placement.sheetIndex];
