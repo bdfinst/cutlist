@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { calculateCutlist } from './algorithm';
-import type { PieceDefinition, SheetConfig } from './types';
+import { calculateCutlist } from '$lib/algorithm';
+import type { PieceDefinition, SheetConfig } from '$lib/types';
 
 function makePiece(overrides: Partial<PieceDefinition> = {}): PieceDefinition {
 	return {

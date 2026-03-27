@@ -51,9 +51,7 @@ Without headers, columns are positional: label, width, height, quantity. Quantit
 src/
   lib/
     algorithm.ts          -- Guillotine bin-packing with multi-strategy sort
-    algorithm.spec.ts     -- 16 algorithm tests
     csv.ts                -- CSV parser with header detection
-    csv.spec.ts           -- 20 CSV parser tests
     colors.ts             -- Tableau colorblind-safe palette, hex-to-RGB, contrast
     pdf.ts                -- Vector PDF generation with jsPDF
     types.ts              -- Shared TypeScript interfaces
@@ -69,6 +67,9 @@ src/
     +page.svelte          -- Main page layout
     +layout.svelte        -- App shell
     layout.css            -- Tailwind config, theme, custom styles
+test/
+  algorithm.spec.ts       -- 16 algorithm tests
+  csv.spec.ts             -- 20 CSV parser tests
 ```
 
 ## Algorithm
@@ -92,7 +93,7 @@ The optimizer uses guillotine bin-packing, which means every cut goes fully edge
 | Type check | `npm run check` |
 | All tests | `npm test` |
 | Tests (watch) | `npm run test:unit` |
-| Single test file | `npx vitest run src/lib/algorithm.spec.ts` |
+| Single test file | `npx vitest run test/algorithm.spec.ts` |
 
 ## Tech stack
 

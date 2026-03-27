@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseCSV } from './csv';
+import { parseCSV } from '$lib/csv';
 
 describe('parseCSV', () => {
 	it('parses a CSV with headers', () => {
