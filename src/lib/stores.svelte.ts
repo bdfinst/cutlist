@@ -1,5 +1,6 @@
 import { getColor } from './colors';
-import type { PieceDefinition, SheetConfig } from './types';
+import { calculateCutlist } from './algorithm';
+import type { PieceDefinition, SheetConfig, CutlistResult } from './types';
 
 export const DEFAULT_PIECE_WIDTH = 12;
 export const DEFAULT_PIECE_HEIGHT = 24;
@@ -16,6 +17,8 @@ export let pieces = $state<PieceDefinition[]>([]);
 export let config = $state<SheetConfig>({ ...DEFAULT_CONFIG });
 
 let nextColorIndex = 0;
+
+export const cutlistResult: CutlistResult = $derived(calculateCutlist(pieces, config));
 
 export function addPiece(label: string, width: number, height: number, quantity: number): void {
 	const piece: PieceDefinition = {

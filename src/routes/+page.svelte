@@ -1,6 +1,7 @@
 <script lang="ts">
 	import PieceList from '$lib/components/PieceList.svelte';
 	import SheetConfig from '$lib/components/SheetConfig.svelte';
+	import LayoutResults from '$lib/components/LayoutResults.svelte';
 </script>
 
 <svelte:head>
@@ -17,7 +18,7 @@
 		</section>
 
 		<section aria-label="Layout results">
-			<p class="text-sm text-gray-500">Results will appear here once visualization is implemented.</p>
+			<LayoutResults />
 		</section>
 	</div>
 </main>
