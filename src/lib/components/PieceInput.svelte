@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PieceDefinition } from '$lib/types';
-	import { updatePiece, removePiece } from '$lib/stores.svelte';
+	import { store } from '$lib/stores.svelte';
 
 	const DIMENSION_STEP = 0.125;
 
@@ -28,7 +28,7 @@
 			id="piece-label-{piece.id}"
 			type="text"
 			value={piece.label}
-			oninput={(e) => updatePiece(piece.id, { label: e.currentTarget.value })}
+			oninput={(e) => store.updatePiece(piece.id, { label: e.currentTarget.value })}
 			placeholder="Piece name"
 			class="w-28 rounded border border-gray-300 px-2 py-1 text-sm"
 		/>
@@ -40,7 +40,7 @@
 				id="piece-width-{piece.id}"
 				type="number"
 				value={piece.width}
-				oninput={(e) => updatePiece(piece.id, { width: parseFloat(e.currentTarget.value) || 0 })}
+				oninput={(e) => store.updatePiece(piece.id, { width: parseFloat(e.currentTarget.value) || 0 })}
 				step={DIMENSION_STEP}
 				min="0.125"
 				class="w-20 rounded border px-2 py-1 text-sm {widthInvalid ? 'border-red-400 bg-red-50' : 'border-gray-300'}"
@@ -56,7 +56,7 @@
 				id="piece-height-{piece.id}"
 				type="number"
 				value={piece.height}
-				oninput={(e) => updatePiece(piece.id, { height: parseFloat(e.currentTarget.value) || 0 })}
+				oninput={(e) => store.updatePiece(piece.id, { height: parseFloat(e.currentTarget.value) || 0 })}
 				step={DIMENSION_STEP}
 				min="0.125"
 				class="w-20 rounded border px-2 py-1 text-sm {heightInvalid ? 'border-red-400 bg-red-50' : 'border-gray-300'}"
@@ -72,7 +72,7 @@
 				id="piece-qty-{piece.id}"
 				type="number"
 				value={piece.quantity}
-				oninput={(e) => updatePiece(piece.id, { quantity: parseInt(e.currentTarget.value) || 1 })}
+				oninput={(e) => store.updatePiece(piece.id, { quantity: parseInt(e.currentTarget.value) || 1 })}
 				min="1"
 				class="w-16 rounded border px-2 py-1 text-sm {qtyInvalid ? 'border-red-400 bg-red-50' : 'border-gray-300'}"
 				aria-invalid={qtyInvalid}
@@ -81,7 +81,7 @@
 		</label>
 
 		<button
-			onclick={() => removePiece(piece.id)}
+			onclick={() => store.removePiece(piece.id)}
 			class="ml-auto shrink-0 rounded px-2 py-1 text-sm text-red-600 hover:bg-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
 			aria-label="Remove {piece.label || 'piece'}"
 		>

@@ -36,53 +36,60 @@ function loadSaved(): { pieces: PieceDefinition[]; config: SheetConfig; nextColo
 
 const saved = loadSaved();
 
-export let pieces = $state<PieceDefinition[]>(saved.pieces);
-export let config = $state<SheetConfig>(saved.config);
+class CutlistStore {
+	pieces = $state<PieceDefinition[]>(saved.pieces);
+	config = $state<SheetConfig>(saved.config);
+	#nextColorIndex = saved.nextColor;
 
-let nextColorIndex = saved.nextColor;
+	readonly result: CutlistResult = $derived(calculateCutlist(this.pieces, this.config));
 
-export const cutlistResult: CutlistResult = $derived(calculateCutlist(pieces, config));
+	#persist(): void {
+		if (!browser) return;
+		try {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify({
+				pieces: this.pieces,
+				config: this.config,
+				nextColor: this.#nextColorIndex
+			}));
+		} catch {
+			// localStorage unavailable — silently skip
+		}
+	}
 
-function persist(): void {
-	if (!browser) return;
-	try {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify({ pieces, config, nextColor: nextColorIndex }));
-	} catch {
-		// localStorage unavailable (private browsing) — silently skip
+	addPiece(label: string, width: number, height: number, quantity: number): void {
+		const piece: PieceDefinition = {
+			id: crypto.randomUUID(),
+			label,
+			width,
+			height,
+			quantity,
+			color: getColor(this.#nextColorIndex++)
+		};
+		this.pieces = [...this.pieces, piece];
+		this.#persist();
+	}
+
+	removePiece(id: string): void {
+		this.pieces = this.pieces.filter((p) => p.id !== id);
+		this.#persist();
+	}
+
+	updatePiece(id: string, updates: Partial<Omit<PieceDefinition, 'id' | 'color'>>): void {
+		this.pieces = this.pieces.map((p) => (p.id === id ? { ...p, ...updates } : p));
+		this.#persist();
+	}
+
+	updateConfig(updates: Partial<SheetConfig>): void {
+		this.config = { ...this.config, ...updates };
+		this.#persist();
+	}
+
+	reset(): void {
+		this.pieces = [];
+		this.config = { ...DEFAULT_CONFIG };
+		this.#nextColorIndex = 0;
+		this.#persist();
 	}
 }
 
-export function addPiece(label: string, width: number, height: number, quantity: number): void {
-	const piece: PieceDefinition = {
-		id: crypto.randomUUID(),
-		label,
-		width,
-		height,
-		quantity,
-		color: getColor(nextColorIndex++)
-	};
-	pieces = [...pieces, piece];
-	persist();
-}
-
-export function removePiece(id: string): void {
-	pieces = pieces.filter((p) => p.id !== id);
-	persist();
-}
-
-export function updatePiece(id: string, updates: Partial<Omit<PieceDefinition, 'id' | 'color'>>): void {
-	pieces = pieces.map((p) => (p.id === id ? { ...p, ...updates } : p));
-	persist();
-}
-
-export function updateConfig(updates: Partial<SheetConfig>): void {
-	config = { ...config, ...updates };
-	persist();
-}
-
-export function reset(): void {
-	pieces = [];
-	config = { ...DEFAULT_CONFIG };
-	nextColorIndex = 0;
-	persist();
-}
+export const store = new CutlistStore();
