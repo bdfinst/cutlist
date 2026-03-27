@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { cutlistResult, config, pieces } from '$lib/stores.svelte';
+	import { generatePDF } from '$lib/pdf';
 	import LayoutPreview from './LayoutPreview.svelte';
 
 	let resultSummary = $derived(
@@ -38,6 +39,14 @@
 		{#each cutlistResult.sheets as sheet (sheet.sheetIndex)}
 			<LayoutPreview {sheet} {config} />
 		{/each}
+
+		<button
+			type="button"
+			onclick={() => generatePDF(cutlistResult, config, pieces)}
+			class="rounded bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+		>
+			Download PDF
+		</button>
 	</div>
 {/if}
 
