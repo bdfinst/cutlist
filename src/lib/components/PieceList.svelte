@@ -47,29 +47,29 @@
 			}
 		};
 		reader.readAsText(file);
-
-		// Reset input so the same file can be re-imported
 		input.value = '';
 	}
+
+	const btnBase = 'rounded px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
 </script>
 
 <div class="space-y-3">
 	<div class="flex items-center justify-between">
-		<h2 class="text-lg font-semibold">Pieces</h2>
-		<div class="flex gap-2">
+		<h2 class="text-xs font-semibold tracking-widest uppercase text-shop-muted">Pieces</h2>
+		<div class="flex gap-1.5">
 			<button
 				type="button"
 				onclick={handleReset}
 				disabled={store.pieces.length === 0}
-				title="Clears all pieces and resets configuration to defaults"
-				class="rounded border border-gray-300 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
+				title="Clear all pieces and reset configuration"
+				class="{btnBase} text-shop-muted border border-shop-light hover:bg-shop-light hover:text-shop-text focus-visible:outline-shop-muted disabled:opacity-30 disabled:pointer-events-none"
 			>
 				Reset
 			</button>
 			<button
 				type="button"
 				onclick={handleImportClick}
-				class="rounded border border-gray-300 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+				class="{btnBase} text-shop-muted border border-shop-light hover:bg-shop-light hover:text-shop-text focus-visible:outline-shop-muted"
 			>
 				Import CSV
 			</button>
@@ -79,34 +79,36 @@
 				accept=".csv,text/csv"
 				onchange={handleFileChange}
 				class="hidden"
-				/>
+			/>
 			<button
 				bind:this={addBtn}
 				type="button"
 				onclick={handleAdd}
-				class="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+				class="{btnBase} bg-plywood text-shop-dark hover:bg-plywood-light focus-visible:outline-plywood"
 			>
-				Add Piece
+				+ Add piece
 			</button>
 		</div>
 	</div>
 
 	{#if importWarnings.length > 0}
-		<div class="rounded border border-amber-300 bg-amber-50 p-3" role="alert">
+		<div class="rounded-lg border border-warn-border bg-warn-bg p-3" role="alert">
 			<div class="flex items-start justify-between">
-				<p class="text-sm font-medium text-amber-800">
-					{importWarnings.length} row{importWarnings.length === 1 ? '' : 's'} skipped during import:
+				<p class="text-xs font-medium text-warn-text">
+					{importWarnings.length} row{importWarnings.length === 1 ? '' : 's'} skipped:
 				</p>
 				<button
 					type="button"
 					onclick={() => (importWarnings = [])}
-					class="text-sm text-amber-600 hover:text-amber-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+					class="text-warn-text/60 hover:text-warn-text transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warn-text"
 					aria-label="Dismiss import warnings"
 				>
-					&times;
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+					</svg>
 				</button>
 			</div>
-			<ul class="mt-1 list-inside list-disc text-sm text-amber-700">
+			<ul class="mt-1 space-y-0.5 text-xs text-warn-text/80">
 				{#each importWarnings as warning}
 					<li>{warning}</li>
 				{/each}
@@ -115,10 +117,13 @@
 	{/if}
 
 	{#if store.pieces.length === 0}
-		<p class="text-sm text-gray-500">No pieces added yet. Click "Add Piece" or "Import CSV" to get started.</p>
+		<div class="rounded-lg border border-dashed border-shop-light/60 py-8 text-center">
+			<p class="text-sm text-shop-muted">No pieces yet</p>
+			<p class="text-xs text-shop-muted/60 mt-1">Add pieces manually or import from CSV</p>
+		</div>
 	{/if}
 
-	<ul class="space-y-2" role="list">
+	<ul class="space-y-1.5" role="list">
 		{#each store.pieces as piece (piece.id)}
 			<PieceInput {piece} />
 		{/each}

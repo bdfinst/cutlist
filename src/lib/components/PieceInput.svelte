@@ -12,30 +12,36 @@
 
 	let errorId = $derived(`piece-${piece.id}-errors`);
 	let hasErrors = $derived(widthInvalid || heightInvalid || qtyInvalid);
+
+	const numBase = 'rounded bg-shop-dark border px-2 py-1 text-sm font-mono text-shop-text transition-colors focus:outline-none focus:ring-1';
+	const numValid = 'border-shop-light focus:border-plywood focus:ring-plywood/30';
+	const numError = 'border-danger/50 bg-danger/5 focus:border-danger focus:ring-danger/30';
 </script>
 
-<li class="space-y-1 rounded border border-gray-200 bg-white p-2">
+<li class="group rounded-lg border border-shop-light/60 bg-shop-mid p-2.5 transition-colors hover:border-shop-muted/50">
 	<div class="flex items-center gap-2">
+		<!-- Color swatch -->
 		<div
-			class="h-4 w-4 shrink-0 rounded"
+			class="h-3 w-3 shrink-0 rounded-sm ring-1 ring-white/10"
 			style:background-color={piece.color}
 			role="img"
 			aria-label="Color indicator for {piece.label || 'piece'}"
 		></div>
 
+		<!-- Label -->
 		<label class="sr-only" for="piece-label-{piece.id}">Piece name</label>
 		<input
 			id="piece-label-{piece.id}"
 			type="text"
 			value={piece.label}
 			oninput={(e) => store.updatePiece(piece.id, { label: e.currentTarget.value })}
-			placeholder="Piece name"
-			class="w-28 rounded border border-gray-300 px-2 py-1 text-sm"
+			placeholder="Name"
+			class="min-w-0 flex-1 rounded bg-transparent border border-transparent px-1.5 py-1 text-sm text-white placeholder:text-shop-muted transition-colors focus:border-shop-light focus:bg-shop-dark focus:outline-none focus:ring-1 focus:ring-plywood/30"
 		/>
 
-		<label class="flex items-center gap-1 text-sm text-gray-600" for="piece-width-{piece.id}">
-			<span aria-hidden="true">W</span>
-			<span class="sr-only">Width (in)</span>
+		<!-- Dimensions -->
+		<div class="flex items-center gap-1 text-xs text-shop-muted shrink-0">
+			<label class="sr-only" for="piece-width-{piece.id}">Width (in)</label>
 			<input
 				id="piece-width-{piece.id}"
 				type="number"
@@ -43,15 +49,12 @@
 				oninput={(e) => store.updatePiece(piece.id, { width: parseFloat(e.currentTarget.value) || 0 })}
 				step={DIMENSION_STEP}
 				min="0.125"
-				class="w-20 rounded border px-2 py-1 text-sm {widthInvalid ? 'border-red-400 bg-red-50' : 'border-gray-300'}"
+				class="w-16 {numBase} {widthInvalid ? numError : numValid}"
 				aria-invalid={widthInvalid}
 				aria-describedby={hasErrors ? errorId : undefined}
 			/>
-		</label>
-
-		<label class="flex items-center gap-1 text-sm text-gray-600" for="piece-height-{piece.id}">
-			<span aria-hidden="true">H</span>
-			<span class="sr-only">Height (in)</span>
+			<span aria-hidden="true" class="text-shop-muted/60">&times;</span>
+			<label class="sr-only" for="piece-height-{piece.id}">Height (in)</label>
 			<input
 				id="piece-height-{piece.id}"
 				type="number"
@@ -59,41 +62,45 @@
 				oninput={(e) => store.updatePiece(piece.id, { height: parseFloat(e.currentTarget.value) || 0 })}
 				step={DIMENSION_STEP}
 				min="0.125"
-				class="w-20 rounded border px-2 py-1 text-sm {heightInvalid ? 'border-red-400 bg-red-50' : 'border-gray-300'}"
+				class="w-16 {numBase} {heightInvalid ? numError : numValid}"
 				aria-invalid={heightInvalid}
 				aria-describedby={hasErrors ? errorId : undefined}
 			/>
-		</label>
+		</div>
 
-		<label class="flex items-center gap-1 text-sm text-gray-600" for="piece-qty-{piece.id}">
-			<span aria-hidden="true">Qty</span>
-			<span class="sr-only">Quantity</span>
+		<!-- Quantity -->
+		<label class="sr-only" for="piece-qty-{piece.id}">Quantity</label>
+		<div class="flex items-center gap-1 shrink-0">
+			<span class="text-xs text-shop-muted">&times;</span>
 			<input
 				id="piece-qty-{piece.id}"
 				type="number"
 				value={piece.quantity}
 				oninput={(e) => store.updatePiece(piece.id, { quantity: parseInt(e.currentTarget.value) || 1 })}
 				min="1"
-				class="w-16 rounded border px-2 py-1 text-sm {qtyInvalid ? 'border-red-400 bg-red-50' : 'border-gray-300'}"
+				class="w-10 {numBase} text-center {qtyInvalid ? numError : numValid}"
 				aria-invalid={qtyInvalid}
 				aria-describedby={hasErrors ? errorId : undefined}
 			/>
-		</label>
+		</div>
 
+		<!-- Remove -->
 		<button
 			onclick={() => store.removePiece(piece.id)}
-			class="ml-auto shrink-0 rounded px-2 py-1 text-sm text-red-600 hover:bg-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+			class="shrink-0 rounded p-1 text-shop-muted opacity-0 group-hover:opacity-100 transition-opacity hover:text-danger hover:bg-danger/10 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
 			aria-label="Remove {piece.label || 'piece'}"
 		>
-			&times;
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+			</svg>
 		</button>
 	</div>
 
 	{#if hasErrors}
-		<p id={errorId} class="text-xs text-red-600" role="alert">
-			{#if widthInvalid}Width must be greater than 0. {/if}
-			{#if heightInvalid}Height must be greater than 0. {/if}
-			{#if qtyInvalid}Quantity must be at least 1.{/if}
+		<p id={errorId} class="mt-1.5 text-xs text-danger pl-5" role="alert">
+			{#if widthInvalid}Width must be &gt; 0. {/if}
+			{#if heightInvalid}Height must be &gt; 0. {/if}
+			{#if qtyInvalid}Qty must be &ge; 1.{/if}
 		</p>
 	{/if}
 </li>

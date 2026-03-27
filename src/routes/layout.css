@@ -1,1 +1,77 @@
 @import 'tailwindcss';
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@theme {
+	--color-plywood: #d4a756;
+	--color-plywood-light: #e8c87a;
+	--color-plywood-dark: #b8893a;
+	--color-sawdust: #f5e6c8;
+	--color-shop-dark: #1a1a1f;
+	--color-shop-mid: #2a2a32;
+	--color-shop-light: #3a3a44;
+	--color-shop-text: #c8c8d0;
+	--color-shop-muted: #7a7a88;
+	--color-kerf: #ff6b35;
+	--color-success: #4caf50;
+	--color-danger: #ef5350;
+	--color-warn-bg: #3d3520;
+	--color-warn-border: #6b5a2e;
+	--color-warn-text: #e8c87a;
+
+	--font-sans: 'DM Sans', system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+body {
+	background: var(--color-shop-dark);
+	color: var(--color-shop-text);
+	font-family: var(--font-sans);
+	-webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-shop-dark); }
+::-webkit-scrollbar-thumb { background: var(--color-shop-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-shop-muted); }
+
+/* Number input spinner hiding */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+input[type="number"] { -moz-appearance: textfield; }
+
+/* Custom checkbox */
+input[type="checkbox"] {
+	appearance: none;
+	width: 1rem;
+	height: 1rem;
+	border: 1.5px solid var(--color-shop-muted);
+	border-radius: 3px;
+	background: var(--color-shop-mid);
+	cursor: pointer;
+	position: relative;
+	transition: all 0.15s ease;
+}
+input[type="checkbox"]:checked {
+	background: var(--color-plywood);
+	border-color: var(--color-plywood);
+}
+input[type="checkbox"]:checked::after {
+	content: '';
+	position: absolute;
+	left: 4px;
+	top: 1px;
+	width: 5px;
+	height: 8px;
+	border: solid var(--color-shop-dark);
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+}
+input[type="checkbox"]:focus-visible {
+	outline: 2px solid var(--color-plywood);
+	outline-offset: 2px;
+}

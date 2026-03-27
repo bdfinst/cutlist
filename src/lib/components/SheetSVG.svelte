@@ -13,24 +13,47 @@
 </script>
 
 <svg
-	viewBox="0 0 {config.width} {config.height}"
+	viewBox="-0.5 -0.5 {config.width + 1} {config.height + 1}"
 	preserveAspectRatio="xMidYMid meet"
 	width="100%"
-	class="border border-gray-300 bg-gray-50"
+	class="rounded-lg"
 	role="img"
 	aria-labelledby={titleId}
 >
 	<title id={titleId}>Sheet layout showing {pieces.length} piece{pieces.length === 1 ? '' : 's'}</title>
 
+	<defs>
+		<!-- Grid pattern for waste area -->
+		<pattern id="grid-{titleId}" width="4" height="4" patternUnits="userSpaceOnUse">
+			<path d="M 4 0 L 0 0 0 4" fill="none" stroke="#3a3a44" stroke-width="0.15"/>
+		</pattern>
+	</defs>
+
+	<!-- Sheet background (waste area with grid) -->
+	<rect
+		x="0" y="0"
+		width={config.width}
+		height={config.height}
+		fill="#2a2a32"
+		rx="0.5"
+	/>
+	<rect
+		x="0" y="0"
+		width={config.width}
+		height={config.height}
+		fill="url(#grid-{titleId})"
+		rx="0.5"
+	/>
+
 	<!-- Sheet outline -->
 	<rect
-		x="0"
-		y="0"
+		x="0" y="0"
 		width={config.width}
 		height={config.height}
 		fill="none"
-		stroke="#999"
-		stroke-width="0.25"
+		stroke="#555"
+		stroke-width="0.3"
+		rx="0.5"
 	/>
 
 	<!-- Placed pieces -->
@@ -42,9 +65,9 @@
 			width={piece.width}
 			height={piece.height}
 			fill={piece.color}
-			stroke="#fff"
+			stroke="rgba(0,0,0,0.3)"
 			stroke-width="0.15"
-			opacity="0.85"
+			rx="0.3"
 		/>
 		<text
 			x={piece.x + piece.width / 2}
@@ -53,7 +76,8 @@
 			dominant-baseline="middle"
 			font-size={fontSize(piece)}
 			fill={textColor}
-			font-weight="bold"
+			font-weight="600"
+			font-family="'DM Sans', sans-serif"
 		>
 			{piece.label}{piece.rotated ? ' ↻' : ''}
 		</text>
@@ -62,11 +86,12 @@
 			y={piece.y + piece.height / 2 + fontSize(piece) * 0.8}
 			text-anchor="middle"
 			dominant-baseline="middle"
-			font-size={fontSize(piece) * 0.7}
+			font-size={fontSize(piece) * 0.65}
 			fill={textColor}
-			opacity="0.9"
+			opacity="0.7"
+			font-family="'JetBrains Mono', monospace"
 		>
-			{piece.width} × {piece.height}
+			{piece.width}&times;{piece.height}
 		</text>
 	{/each}
 </svg>
