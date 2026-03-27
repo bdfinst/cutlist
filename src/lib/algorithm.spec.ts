@@ -134,16 +134,16 @@ describe('calculateCutlist', () => {
 		expect(withKerf.sheets[0].wastePercent).toBeGreaterThan(noKerf.sheets[0].wastePercent);
 	});
 
-	it('overflows to second sheet when kerf makes pieces too wide', () => {
+	it('overflows when kerf prevents side-by-side placement', () => {
 		expect.assertions(1);
-		// Full-height pieces cannot stack vertically, so only width matters.
-		// 3 pieces of 24×96 on a 48-wide sheet overflow once kerf is applied.
+		// 24" + 0.125" kerf = 24.125" consumed. Remaining 23.875" < 24".
+		// Each full-height piece needs its own sheet.
 		const result = calculateCutlist(
 			[makePiece({ label: 'A', width: 24, height: 96, quantity: 3 })],
 			configWith({ kerf: 0.125 })
 		);
 
-		expect(result.totalSheets).toBe(2);
+		expect(result.totalSheets).toBe(3);
 	});
 
 	it('expands quantity into individual placed pieces', () => {

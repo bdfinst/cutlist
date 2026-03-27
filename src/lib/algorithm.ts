@@ -5,8 +5,6 @@ interface FreeRect {
 	y: number;
 	width: number;
 	height: number;
-	rightEdge: boolean;
-	bottomEdge: boolean;
 }
 
 interface Sheet {
@@ -33,11 +31,56 @@ interface Placement {
 	score: number;
 }
 
-export function calculateCutlist(pieces: PieceDefinition[], config: SheetConfig): CutlistResult {
-	const expanded = expandPieces(pieces).toSorted(
-		(a, b) => b.width * b.height - a.width * a.height
-	);
+type SortStrategy = (a: ExpandedPiece, b: ExpandedPiece) => number;
 
+const SORT_STRATEGIES: SortStrategy[] = [
+	// Area descending
+	(a, b) => b.width * b.height - a.width * a.height,
+	// Height descending (tall pieces first)
+	(a, b) => Math.max(b.width, b.height) - Math.max(a.width, a.height),
+	// Width descending
+	(a, b) => Math.min(b.width, b.height) - Math.min(a.width, a.height),
+	// Perimeter descending
+	(a, b) => (b.width + b.height) - (a.width + a.height)
+];
+
+const EPSILON = 0.0001;
+
+export function calculateCutlist(pieces: PieceDefinition[], config: SheetConfig): CutlistResult {
+	const expanded = expandPieces(pieces);
+
+	let bestResult: CutlistResult | null = null;
+
+	for (const strategy of SORT_STRATEGIES) {
+		const sorted = expanded.toSorted(strategy);
+		const result = runPacking(sorted, pieces, config);
+
+		if (!bestResult || isBetterResult(result, bestResult)) {
+			bestResult = result;
+		}
+	}
+
+	return bestResult!;
+}
+
+function isBetterResult(a: CutlistResult, b: CutlistResult): boolean {
+	// Fewer unfit pieces is always better
+	if (a.unfitPieces.length !== b.unfitPieces.length) {
+		return a.unfitPieces.length < b.unfitPieces.length;
+	}
+	// Fewer sheets is better
+	if (a.totalSheets !== b.totalSheets) {
+		return a.totalSheets < b.totalSheets;
+	}
+	// Same sheet count — less waste is better
+	return a.totalWastePercent < b.totalWastePercent;
+}
+
+function runPacking(
+	expanded: ExpandedPiece[],
+	originalPieces: PieceDefinition[],
+	config: SheetConfig
+): CutlistResult {
 	const sheets: Sheet[] = [];
 	const unfitPieces: PieceDefinition[] = [];
 
@@ -47,19 +90,9 @@ export function calculateCutlist(pieces: PieceDefinition[], config: SheetConfig)
 		if (placement) {
 			placePiece(piece, placement, sheets, config);
 		} else {
-			// Try a new sheet
 			const newSheetIndex = sheets.length;
 			sheets.push({
-				freeRects: [
-					{
-						x: 0,
-						y: 0,
-						width: config.width,
-						height: config.height,
-						rightEdge: true,
-						bottomEdge: true
-					}
-				],
+				freeRects: [{ x: 0, y: 0, width: config.width, height: config.height }],
 				placed: []
 			});
 
@@ -67,10 +100,9 @@ export function calculateCutlist(pieces: PieceDefinition[], config: SheetConfig)
 			if (newPlacement) {
 				placePiece(piece, newPlacement, sheets, config);
 			} else {
-				// Piece doesn't fit on an empty sheet
 				sheets.pop();
 				if (!unfitPieces.find((p) => p.id === piece.id)) {
-					unfitPieces.push(pieces.find((p) => p.id === piece.id)!);
+					unfitPieces.push(originalPieces.find((p) => p.id === piece.id)!);
 				}
 			}
 		}
@@ -82,7 +114,7 @@ export function calculateCutlist(pieces: PieceDefinition[], config: SheetConfig)
 		return {
 			sheetIndex: i,
 			pieces: sheet.placed,
-			wastePercent: ((1 - usedArea / sheetArea) * 100)
+			wastePercent: (1 - usedArea / sheetArea) * 100
 		};
 	});
 
@@ -123,11 +155,13 @@ function fitsInRect(
 	rect: FreeRect,
 	kerf: number
 ): boolean {
-	const needKerfRight = !rect.rightEdge;
-	const needKerfBottom = !rect.bottomEdge;
+	// Kerf is needed on right/bottom only when the piece doesn't fill the rect
+	// (a cut is required to separate the piece from remaining material)
+	const needKerfRight = pieceW < rect.width - EPSILON;
+	const needKerfBottom = pieceH < rect.height - EPSILON;
 	const totalW = pieceW + (needKerfRight ? kerf : 0);
 	const totalH = pieceH + (needKerfBottom ? kerf : 0);
-	return totalW <= rect.width + 0.0001 && totalH <= rect.height + 0.0001;
+	return totalW <= rect.width + EPSILON && totalH <= rect.height + EPSILON;
 }
 
 function findBestPlacement(
@@ -208,17 +242,15 @@ function placePiece(
 
 	// Guillotine split: create two new free rects from remaining space
 	const kerf = config.kerf;
-	const needKerfRight = !rect.rightEdge;
-	const needKerfBottom = !rect.bottomEdge;
+	const needKerfRight = placement.width < rect.width - EPSILON;
+	const needKerfBottom = placement.height < rect.height - EPSILON;
 	const consumedW = placement.width + (needKerfRight ? kerf : 0);
 	const consumedH = placement.height + (needKerfBottom ? kerf : 0);
 
 	const rightW = rect.width - consumedW;
 	const bottomH = rect.height - consumedH;
 
-	// Choose split direction: prefer the split that produces more usable rectangles
-	// Split horizontally (right rect gets full remaining height) vs
-	// Split vertically (bottom rect gets full remaining width)
+	// Choose split direction: prefer the split that produces more usable area
 	const splitHoriz = rightW * rect.height >= rect.width * bottomH;
 
 	if (splitHoriz) {
@@ -228,9 +260,7 @@ function placePiece(
 				x: rect.x + consumedW,
 				y: rect.y,
 				width: rightW,
-				height: rect.height,
-				rightEdge: rect.rightEdge,
-				bottomEdge: rect.bottomEdge
+				height: rect.height
 			});
 		}
 		// Bottom rect: width of placed piece only
@@ -238,10 +268,8 @@ function placePiece(
 			sheet.freeRects.push({
 				x: rect.x,
 				y: rect.y + consumedH,
-				width: consumedW - (needKerfRight ? kerf : 0),
-				height: bottomH,
-				rightEdge: false,
-				bottomEdge: rect.bottomEdge
+				width: placement.width,
+				height: bottomH
 			});
 		}
 	} else {
@@ -251,9 +279,7 @@ function placePiece(
 				x: rect.x,
 				y: rect.y + consumedH,
 				width: rect.width,
-				height: bottomH,
-				rightEdge: rect.rightEdge,
-				bottomEdge: rect.bottomEdge
+				height: bottomH
 			});
 		}
 		// Right rect: height of placed piece only
@@ -262,9 +288,7 @@ function placePiece(
 				x: rect.x + consumedW,
 				y: rect.y,
 				width: rightW,
-				height: consumedH - (needKerfBottom ? kerf : 0),
-				rightEdge: rect.rightEdge,
-				bottomEdge: false
+				height: placement.height
 			});
 		}
 	}
