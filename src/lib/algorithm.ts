@@ -46,8 +46,19 @@ const SORT_STRATEGIES: SortStrategy[] = [
 
 const EPSILON = 0.0001;
 
+const MAX_EXPANDED_PIECES = 500;
+
 export function calculateCutlist(pieces: PieceDefinition[], config: SheetConfig): CutlistResult {
 	const expanded = expandPieces(pieces);
+
+	if (expanded.length > MAX_EXPANDED_PIECES) {
+		return {
+			sheets: [],
+			totalSheets: 0,
+			totalWastePercent: 0,
+			unfitPieces: pieces
+		};
+	}
 
 	let bestResult: CutlistResult | null = null;
 
