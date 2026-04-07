@@ -9,8 +9,13 @@ export interface ParseResult {
 
 const LABEL_HEADERS = ['label', 'name', 'piece'];
 const WIDTH_HEADERS = ['width', 'w'];
-const HEIGHT_HEADERS = ['height', 'h'];
+const HEIGHT_HEADERS = ['height', 'h', 'length'];
 const QTY_HEADERS = ['quantity', 'qty', 'count'];
+
+/** Strip parenthetical suffixes and units: "Width (in)" → "width" */
+function normalizeHeader(raw: string): string {
+	return raw.toLowerCase().replace(/\s*\(.*\)\s*$/, '').trim();
+}
 
 function splitCSVRow(line: string): string[] {
 	const fields: string[] = [];
@@ -47,12 +52,12 @@ function detectHeader(fields: string[]): {
 	heightIdx: number;
 	qtyIdx: number;
 } | null {
-	const lower = fields.map((f) => f.toLowerCase());
+	const normalized = fields.map(normalizeHeader);
 
-	const labelIdx = lower.findIndex((f) => LABEL_HEADERS.includes(f));
-	const widthIdx = lower.findIndex((f) => WIDTH_HEADERS.includes(f));
-	const heightIdx = lower.findIndex((f) => HEIGHT_HEADERS.includes(f));
-	const qtyIdx = lower.findIndex((f) => QTY_HEADERS.includes(f));
+	const labelIdx = normalized.findIndex((f) => LABEL_HEADERS.includes(f));
+	const widthIdx = normalized.findIndex((f) => WIDTH_HEADERS.includes(f));
+	const heightIdx = normalized.findIndex((f) => HEIGHT_HEADERS.includes(f));
+	const qtyIdx = normalized.findIndex((f) => QTY_HEADERS.includes(f));
 
 	if (widthIdx !== -1 && heightIdx !== -1) {
 		return { labelIdx, widthIdx, heightIdx, qtyIdx };

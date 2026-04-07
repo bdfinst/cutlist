@@ -94,7 +94,7 @@ class CutlistStore {
 
 export const store = new CutlistStore();
 
-// Expose store for e2e testing
-if (browser) {
+// Expose store for e2e testing (dev builds only)
+if (browser && import.meta.env.DEV) {
 	(window as any).__cutlistStore = store;
 }

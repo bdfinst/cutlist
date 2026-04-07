@@ -157,4 +157,21 @@ describe('parseCSV', () => {
 
 		expect(result.pieces[0]).toEqual({ label: 'Shelf', width: 12, height: 24, quantity: 3 });
 	});
+
+	it('recognizes headers with parenthetical units like "Width (in)"', () => {
+		expect.assertions(3);
+		const result = parseCSV('Qty,Width (in),Length (in),Area (sq in)\n2,14,48,1344');
+
+		expect(result.pieces).toHaveLength(1);
+		expect(result.pieces[0]).toEqual({ label: '', width: 14, height: 48, quantity: 2 });
+		expect(result.warnings).toHaveLength(0);
+	});
+
+	it('recognizes "length" as a height alias', () => {
+		expect.assertions(2);
+		const result = parseCSV('width,length,qty\n12,24,3');
+
+		expect(result.pieces).toHaveLength(1);
+		expect(result.pieces[0]).toEqual({ label: '', width: 12, height: 24, quantity: 3 });
+	});
 });
