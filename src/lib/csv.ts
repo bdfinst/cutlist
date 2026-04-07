@@ -2,8 +2,18 @@ import type { PieceDefinition } from './types';
 
 export type ParsedPiece = Omit<PieceDefinition, 'id' | 'color'>;
 
+export interface ParsedLumberPiece {
+	label: string;
+	width: number;
+	height: number;
+	length: number;
+	quantity: number;
+	material: string;
+}
+
 export interface ParseResult {
 	pieces: ParsedPiece[];
+	lumberPieces: ParsedLumberPiece[];
 	warnings: string[];
 }
 
@@ -11,6 +21,7 @@ const LABEL_HEADERS = ['label', 'name', 'piece'];
 const WIDTH_HEADERS = ['width', 'w'];
 const HEIGHT_HEADERS = ['height', 'h', 'length'];
 const QTY_HEADERS = ['quantity', 'qty', 'count'];
+const MATERIAL_HEADERS = ['material', 'type', 'wood', 'stock'];
 
 /** Strip parenthetical suffixes and units: "Width (in)" → "width" */
 function normalizeHeader(raw: string): string {
@@ -51,6 +62,7 @@ function detectHeader(fields: string[]): {
 	widthIdx: number;
 	heightIdx: number;
 	qtyIdx: number;
+	materialIdx: number;
 } | null {
 	const normalized = fields.map(normalizeHeader);
 
@@ -58,9 +70,10 @@ function detectHeader(fields: string[]): {
 	const widthIdx = normalized.findIndex((f) => WIDTH_HEADERS.includes(f));
 	const heightIdx = normalized.findIndex((f) => HEIGHT_HEADERS.includes(f));
 	const qtyIdx = normalized.findIndex((f) => QTY_HEADERS.includes(f));
+	const materialIdx = normalized.findIndex((f) => MATERIAL_HEADERS.includes(f));
 
 	if (widthIdx !== -1 && heightIdx !== -1) {
-		return { labelIdx, widthIdx, heightIdx, qtyIdx };
+		return { labelIdx, widthIdx, heightIdx, qtyIdx, materialIdx };
 	}
 
 	// Check if the first row looks numeric in positions 1 and 2 — if so, it's data, not a header
@@ -76,9 +89,10 @@ function detectHeader(fields: string[]): {
 export function parseCSV(text: string): ParseResult {
 	const lines = text.split(/\r?\n/);
 	const pieces: ParsedPiece[] = [];
+	const lumberPieces: ParsedLumberPiece[] = [];
 	const warnings: string[] = [];
 
-	if (lines.length === 0) return { pieces, warnings };
+	if (lines.length === 0) return { pieces, lumberPieces, warnings };
 
 	const firstFields = splitCSVRow(lines[0]);
 	const header = detectHeader(firstFields);
@@ -88,6 +102,7 @@ export function parseCSV(text: string): ParseResult {
 	const widthIdx = header?.widthIdx ?? 1;
 	const heightIdx = header?.heightIdx ?? 2;
 	const qtyIdx = header ? (header.qtyIdx >= 0 ? header.qtyIdx : -1) : 3;
+	const materialIdx = header ? header.materialIdx : -1;
 
 	for (let i = startRow; i < lines.length; i++) {
 		const line = lines[i].trim();
@@ -110,8 +125,14 @@ export function parseCSV(text: string): ParseResult {
 		const qtyRaw = qtyIdx >= 0 ? parseFloat(fields[qtyIdx] ?? '') : NaN;
 		const quantity = isNaN(qtyRaw) || qtyRaw < 1 ? 1 : Math.floor(qtyRaw);
 
-		pieces.push({ label, width, height, quantity });
+		const material = materialIdx >= 0 ? (fields[materialIdx] ?? '').trim() : '';
+
+		if (materialIdx >= 0 && material !== '') {
+			lumberPieces.push({ label, width, height, length: height, quantity, material });
+		} else {
+			pieces.push({ label, width, height, quantity });
+		}
 	}
 
-	return { pieces, warnings };
+	return { pieces, lumberPieces, warnings };
 }

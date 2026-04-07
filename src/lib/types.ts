@@ -37,3 +37,44 @@ export interface CutlistResult {
 	totalWastePercent: number;
 	unfitPieces: PieceDefinition[];
 }
+
+export interface LumberType {
+	id: string;
+	name: string;
+	crossWidth: number;
+	crossHeight: number;
+	availableLengths: number[];
+}
+
+export interface LumberPiece {
+	id: string;
+	label: string;
+	length: number;
+	quantity: number;
+	lumberTypeId: string | null;
+	color: string;
+}
+
+export interface PlacedLumberPiece {
+	pieceId: string;
+	label: string;
+	offset: number;
+	length: number;
+	color: string;
+}
+
+export interface BoardLayout {
+	boardIndex: number;
+	lumberTypeId: string;
+	boardLength: number;
+	pieces: PlacedLumberPiece[];
+	wastePercent: number;
+}
+
+export interface LumberResult {
+	boards: BoardLayout[];
+	totalBoards: number;
+	totalWastePercent: number;
+	unfitPieces: LumberPiece[];
+	unassignedPieces: LumberPiece[];
+}
