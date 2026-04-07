@@ -167,6 +167,16 @@ describe('parseCSV', () => {
 		expect(result.warnings).toHaveLength(0);
 	});
 
+	it('never produces NaN labels when label column is absent', () => {
+		expect.assertions(3);
+		const result = parseCSV('Qty,Width (in),Length (in),Area (sq in)\n2,14,48,1344\n1,3.5,55,192.5');
+
+		expect(result.pieces).toHaveLength(2);
+		for (const p of result.pieces) {
+			expect(p.label).not.toContain('NaN');
+		}
+	});
+
 	it('recognizes "length" as a height alias', () => {
 		expect.assertions(2);
 		const result = parseCSV('width,length,qty\n12,24,3');

@@ -84,10 +84,10 @@ export function parseCSV(text: string): ParseResult {
 	const header = detectHeader(firstFields);
 	const startRow = header ? 1 : 0;
 
-	const labelIdx = header?.labelIdx ?? 0;
+	const labelIdx = header ? (header.labelIdx >= 0 ? header.labelIdx : -1) : 0;
 	const widthIdx = header?.widthIdx ?? 1;
 	const heightIdx = header?.heightIdx ?? 2;
-	const qtyIdx = header?.qtyIdx ?? 3;
+	const qtyIdx = header ? (header.qtyIdx >= 0 ? header.qtyIdx : -1) : 3;
 
 	for (let i = startRow; i < lines.length; i++) {
 		const line = lines[i].trim();
@@ -106,8 +106,8 @@ export function parseCSV(text: string): ParseResult {
 			continue;
 		}
 
-		const label = fields[labelIdx] ?? '';
-		const qtyRaw = parseFloat(fields[qtyIdx] ?? '');
+		const label = labelIdx >= 0 ? (fields[labelIdx] ?? '') : '';
+		const qtyRaw = qtyIdx >= 0 ? parseFloat(fields[qtyIdx] ?? '') : NaN;
 		const quantity = isNaN(qtyRaw) || qtyRaw < 1 ? 1 : Math.floor(qtyRaw);
 
 		pieces.push({ label, width, height, quantity });
