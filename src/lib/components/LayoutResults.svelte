@@ -47,7 +47,7 @@
 			<button
 				type="button"
 				onclick={() => generatePDF(store.result, store.config, store.pieces)}
-				class="flex items-center gap-2 rounded-lg bg-plywood px-4 py-2 text-sm font-semibold text-shop-dark hover:bg-plywood-light transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plywood"
+				class="flex items-center gap-2 rounded-lg bg-plywood px-4 py-2 text-sm font-semibold text-shop-dark hover:bg-plywood-light transition-colors btn-press btn-glow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plywood"
 			>
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>

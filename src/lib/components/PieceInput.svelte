@@ -87,7 +87,7 @@
 		<!-- Remove -->
 		<button
 			onclick={() => store.removePiece(piece.id)}
-			class="shrink-0 rounded p-1 text-shop-muted opacity-0 group-hover:opacity-100 transition-opacity hover:text-danger hover:bg-danger/10 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
+			class="shrink-0 rounded p-1 text-shop-muted opacity-0 group-hover:opacity-100 transition-all duration-150 hover:text-danger hover:bg-danger/10 hover:scale-110 active:scale-95 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
 			aria-label="Remove {piece.label || 'piece'}"
 		>
 			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

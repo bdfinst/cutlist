@@ -6,7 +6,6 @@
 	let statusMessage = $state('');
 	let importWarnings = $state<string[]>([]);
 	let addBtn: HTMLButtonElement;
-	let fileInput: HTMLInputElement;
 
 	function handleAdd() {
 		store.addPiece('', DEFAULT_PIECE_WIDTH, DEFAULT_PIECE_HEIGHT, DEFAULT_PIECE_QUANTITY);
@@ -21,36 +20,57 @@
 	}
 
 	function handleImportClick() {
-		fileInput?.click();
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = '.csv,text/csv';
+		input.addEventListener('change', () => {
+			const file = input.files?.[0];
+			if (!file) return;
+
+			const reader = new FileReader();
+			reader.onload = () => {
+				const text = reader.result as string;
+				const result = parseCSV(text);
+
+				for (const p of result.pieces) {
+					store.addPiece(p.label, p.width, p.height, p.quantity);
+				}
+
+				importWarnings = result.warnings;
+
+				const count = result.pieces.length;
+				statusMessage = `Imported ${count} piece${count === 1 ? '' : 's'}. ${store.pieces.length} total.`;
+				if (result.warnings.length > 0) {
+					statusMessage += ` ${result.warnings.length} row${result.warnings.length === 1 ? '' : 's'} skipped.`;
+				}
+			};
+			reader.readAsText(file);
+		});
+		input.click();
 	}
 
-	function handleFileChange(e: Event) {
-		const input = e.currentTarget as HTMLInputElement;
-		const file = input.files?.[0];
-		if (!file) return;
-
-		const reader = new FileReader();
-		reader.onload = () => {
-			const text = reader.result as string;
-			const result = parseCSV(text);
-
-			for (const p of result.pieces) {
-				store.addPiece(p.label, p.width, p.height, p.quantity);
-			}
-
-			importWarnings = result.warnings;
-
-			const count = result.pieces.length;
-			statusMessage = `Imported ${count} piece${count === 1 ? '' : 's'}. ${store.pieces.length} total.`;
-			if (result.warnings.length > 0) {
-				statusMessage += ` ${result.warnings.length} row${result.warnings.length === 1 ? '' : 's'} skipped.`;
-			}
-		};
-		reader.readAsText(file);
-		input.value = '';
+	function handleDownloadExample() {
+		const csv = [
+			'Label,Width,Length,Qty',
+			'Shelf,24,12,3',
+			'Side Panel,48,14,2',
+			'Back,48,24,1',
+			'Drawer Front,20,6.5,4',
+			'Divider,22,11.25,2'
+		].join('\n');
+		const blob = new Blob([csv], { type: 'text/csv' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = 'cutlist_example.csv';
+		a.click();
+		URL.revokeObjectURL(url);
 	}
 
-	const btnBase = 'rounded px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
+	const btnBase = 'rounded px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 btn-press';
+	const btnGhost = `${btnBase} text-shop-muted border border-shop-light hover:bg-shop-light/60 hover:text-shop-text focus-visible:outline-shop-muted`;
+	const btnPrimary = `${btnBase} bg-plywood text-shop-dark font-semibold hover:bg-plywood-light focus-visible:outline-plywood btn-glow`;
+	const btnDanger = `${btnBase} text-shop-muted border border-shop-light hover:bg-danger/10 hover:text-danger hover:border-danger/40 focus-visible:outline-danger btn-danger-glow`;
 </script>
 
 <div class="space-y-3">
@@ -62,29 +82,30 @@
 				onclick={handleReset}
 				disabled={store.pieces.length === 0}
 				title="Clear all pieces and reset configuration"
-				class="{btnBase} text-shop-muted border border-shop-light hover:bg-shop-light hover:text-shop-text focus-visible:outline-shop-muted disabled:opacity-30 disabled:pointer-events-none"
+				class="{btnDanger} disabled:opacity-30 disabled:pointer-events-none"
 			>
 				Reset
 			</button>
 			<button
 				type="button"
+				onclick={handleDownloadExample}
+				title="Download an example CSV file"
+				class={btnGhost}
+			>
+				Example CSV
+			</button>
+			<button
+				type="button"
 				onclick={handleImportClick}
-				class="{btnBase} text-shop-muted border border-shop-light hover:bg-shop-light hover:text-shop-text focus-visible:outline-shop-muted"
+				class={btnGhost}
 			>
 				Import CSV
 			</button>
-			<input
-				bind:this={fileInput}
-				type="file"
-				accept=".csv,text/csv"
-				onchange={handleFileChange}
-				class="hidden"
-			/>
 			<button
 				bind:this={addBtn}
 				type="button"
 				onclick={handleAdd}
-				class="{btnBase} bg-plywood text-shop-dark hover:bg-plywood-light focus-visible:outline-plywood"
+				class={btnPrimary}
 			>
 				+ Add piece
 			</button>
