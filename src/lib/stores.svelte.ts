@@ -93,3 +93,8 @@ class CutlistStore {
 }
 
 export const store = new CutlistStore();
+
+// Expose store for e2e testing
+if (browser) {
+	(window as any).__cutlistStore = store;
+}
