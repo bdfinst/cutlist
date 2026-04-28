@@ -127,10 +127,9 @@
 	{/if}
 
 	{#if store.lumberPieces.length === 0}
-		<div class="rounded-lg border border-dashed border-shop-light/60 py-8 text-center">
-			<p class="text-sm text-shop-muted">No lumber pieces yet</p>
-			<p class="text-xs text-shop-muted/60 mt-1">Add pieces manually or import from CSV</p>
-		</div>
+		<p class="text-xs text-shop-muted/70">
+			No lumber pieces yet.
+		</p>
 	{/if}
 
 	<ul class="space-y-1.5" role="list">
