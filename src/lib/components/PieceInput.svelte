@@ -19,8 +19,8 @@
 </script>
 
 <li class="group rounded-lg border border-shop-light/60 bg-shop-mid p-2.5 transition-colors hover:border-shop-muted/50">
+	<!-- Row 1: color + name (takes full row width) -->
 	<div class="flex items-center gap-2">
-		<!-- Color swatch -->
 		<div
 			class="h-3 w-3 shrink-0 rounded-sm ring-1 ring-white/10"
 			style:background-color={piece.color}
@@ -28,7 +28,6 @@
 			aria-label="Color indicator for {piece.label || 'piece'}"
 		></div>
 
-		<!-- Label -->
 		<label class="sr-only" for="piece-label-{piece.id}">Piece name</label>
 		<input
 			id="piece-label-{piece.id}"
@@ -39,8 +38,20 @@
 			class="min-w-0 flex-1 rounded bg-transparent border border-transparent px-1.5 py-1 text-sm text-white placeholder:text-shop-muted transition-colors focus:border-shop-light focus:bg-shop-dark focus:outline-none focus:ring-1 focus:ring-plywood/30"
 		/>
 
-		<!-- Dimensions -->
-		<div class="flex items-center gap-1 text-xs text-shop-muted shrink-0">
+		<button
+			onclick={() => store.removePiece(piece.id)}
+			class="shrink-0 rounded p-1 text-shop-muted opacity-0 group-hover:opacity-100 transition-all duration-150 hover:text-danger hover:bg-danger/10 hover:scale-110 active:scale-95 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
+			aria-label="Remove {piece.label || 'piece'}"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+			</svg>
+		</button>
+	</div>
+
+	<!-- Row 2: dimensions + quantity (indented to align under the name) -->
+	<div class="mt-1.5 flex items-center gap-2 pl-5">
+		<div class="flex items-center gap-1 text-xs text-shop-muted">
 			<label class="sr-only" for="piece-width-{piece.id}">Width (in)</label>
 			<input
 				id="piece-width-{piece.id}"
@@ -49,7 +60,7 @@
 				oninput={(e) => store.updatePiece(piece.id, { width: parseFloat(e.currentTarget.value) || 0 })}
 				step={DIMENSION_STEP}
 				min="0.125"
-				class="w-16 {numBase} {widthInvalid ? numError : numValid}"
+				class="w-20 {numBase} {widthInvalid ? numError : numValid}"
 				aria-invalid={widthInvalid}
 				aria-describedby={hasErrors ? errorId : undefined}
 			/>
@@ -62,15 +73,14 @@
 				oninput={(e) => store.updatePiece(piece.id, { height: parseFloat(e.currentTarget.value) || 0 })}
 				step={DIMENSION_STEP}
 				min="0.125"
-				class="w-16 {numBase} {heightInvalid ? numError : numValid}"
+				class="w-20 {numBase} {heightInvalid ? numError : numValid}"
 				aria-invalid={heightInvalid}
 				aria-describedby={hasErrors ? errorId : undefined}
 			/>
 		</div>
 
-		<!-- Quantity -->
 		<label class="sr-only" for="piece-qty-{piece.id}">Quantity</label>
-		<div class="flex items-center gap-1 shrink-0">
+		<div class="flex items-center gap-1 ml-auto">
 			<span class="text-xs text-shop-muted">&times;</span>
 			<input
 				id="piece-qty-{piece.id}"
@@ -78,22 +88,11 @@
 				value={piece.quantity}
 				oninput={(e) => store.updatePiece(piece.id, { quantity: parseInt(e.currentTarget.value) || 1 })}
 				min="1"
-				class="w-10 {numBase} text-center {qtyInvalid ? numError : numValid}"
+				class="w-12 {numBase} text-center {qtyInvalid ? numError : numValid}"
 				aria-invalid={qtyInvalid}
 				aria-describedby={hasErrors ? errorId : undefined}
 			/>
 		</div>
-
-		<!-- Remove -->
-		<button
-			onclick={() => store.removePiece(piece.id)}
-			class="shrink-0 rounded p-1 text-shop-muted opacity-0 group-hover:opacity-100 transition-all duration-150 hover:text-danger hover:bg-danger/10 hover:scale-110 active:scale-95 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
-			aria-label="Remove {piece.label || 'piece'}"
-		>
-			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-				<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-			</svg>
-		</button>
 	</div>
 
 	{#if hasErrors}
