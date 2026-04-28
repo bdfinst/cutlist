@@ -38,7 +38,7 @@
 		</label>
 
 		<label class="space-y-1">
-			<span class="text-xs text-shop-muted">Height</span>
+			<span class="text-xs text-shop-muted">Length</span>
 			<div class="relative">
 				<input
 					type="number"

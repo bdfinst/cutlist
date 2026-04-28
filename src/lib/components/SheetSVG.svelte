@@ -22,7 +22,7 @@
 </script>
 
 <svg
-	viewBox="-0.5 -0.5 {config.width + 1} {config.height + 1}"
+	viewBox="0 0 {config.width} {config.height}"
 	preserveAspectRatio="xMidYMid meet"
 	width="100%"
 	class="rounded-lg"
@@ -122,7 +122,7 @@
 	<table class="sr-only">
 		<caption>Piece details</caption>
 		<thead>
-			<tr><th>Label</th><th>Width</th><th>Height</th><th>Position</th><th>Rotated</th></tr>
+			<tr><th>Label</th><th>Width</th><th>Length</th><th>Position</th><th>Rotated</th></tr>
 		</thead>
 		<tbody>
 			{#each pieces as piece}

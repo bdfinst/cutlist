@@ -108,7 +108,7 @@
 							{#each store.trimSuggestions as s}
 								<li>
 									Trim <span class="font-medium">"{s.pieceLabel || 'Unnamed'}"</span>
-									{s.dimension} from
+									{s.dimension === 'height' ? 'length' : 'width'} from
 									<span class="font-mono">{s.originalValue}″</span> →
 									<span class="font-mono">{s.trimmedValue}″</span> →
 									<span class="font-mono text-success">−{s.sheetsSaved} sheet{s.sheetsSaved === 1 ? '' : 's'}</span>
@@ -167,7 +167,8 @@
 											{#if i > 0}<span> or </span>{/if}
 											trim
 											<span class="font-medium text-shop-text">"{r.pieceLabel || 'Unnamed'}"</span>
-											{r.dimension} from <span class="font-mono">{r.from}″</span> →
+											{r.dimension === 'height' ? 'length' : 'width'} from
+											<span class="font-mono">{r.from}″</span> →
 											<span class="font-mono">{r.to.toFixed(3)}″</span>
 										{/each}
 										{#if hasTolerance}

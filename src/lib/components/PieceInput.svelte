@@ -54,7 +54,7 @@
 				aria-describedby={hasErrors ? errorId : undefined}
 			/>
 			<span aria-hidden="true" class="text-shop-muted/60">&times;</span>
-			<label class="sr-only" for="piece-height-{piece.id}">Height (in)</label>
+			<label class="sr-only" for="piece-height-{piece.id}">Length (in)</label>
 			<input
 				id="piece-height-{piece.id}"
 				type="number"
@@ -99,7 +99,7 @@
 	{#if hasErrors}
 		<p id={errorId} class="mt-1.5 text-xs text-danger pl-5" role="alert">
 			{#if widthInvalid}Width must be &gt; 0. {/if}
-			{#if heightInvalid}Height must be &gt; 0. {/if}
+			{#if heightInvalid}Length must be &gt; 0. {/if}
 			{#if qtyInvalid}Qty must be &ge; 1.{/if}
 		</p>
 	{/if}

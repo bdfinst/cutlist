@@ -91,7 +91,7 @@ function renderSummaryPage(doc: jsPDF, pieces: PieceDefinition[], result: Cutlis
 	doc.setFont('helvetica', 'bold');
 	doc.text('Label', colLabel, y);
 	doc.text('Width (in)', colW, y);
-	doc.text('Height (in)', colH, y);
+	doc.text('Length (in)', colH, y);
 	doc.text('Qty', colQty, y);
 	y += 0.25;
 
