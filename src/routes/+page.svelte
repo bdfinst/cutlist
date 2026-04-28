@@ -61,7 +61,7 @@
 	<main class="mx-auto max-w-7xl px-4 py-6 sm:px-6">
 		<div class="flex flex-col gap-6 lg:flex-row">
 			<!-- Left panel: inputs -->
-			<section aria-label="Piece configuration" class="w-full space-y-5 lg:w-96 lg:shrink-0">
+			<section aria-label="Piece configuration" class="w-full space-y-5 lg:w-[28rem] lg:shrink-0">
 				<SheetConfig />
 				<div class="border-t border-shop-light"></div>
 				<PieceList />

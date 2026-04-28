@@ -32,7 +32,7 @@
 {:else}
 	<div class="space-y-5">
 		<!-- Summary bar -->
-		<div class="flex items-center justify-between rounded-lg bg-shop-mid border border-shop-light/60 px-4 py-3">
+		<div class="flex items-center justify-between rounded-lg bg-shop-mid border border-shop-light/60 px-4 py-3 max-w-2xl">
 			<div class="flex items-center gap-4">
 				<div>
 					<div class="text-2xl font-bold text-white font-mono">{store.result.totalSheets}</div>
@@ -72,7 +72,7 @@
 		{/if}
 
 		{#if store.configSuggestions.length > 0 || store.trimSuggestions.length > 0 || store.smallStockSuggestions.length > 0 || store.pairingHints.length > 0}
-			<details class="rounded-lg border border-plywood/40 bg-plywood/5 p-3" open>
+			<details class="rounded-lg border border-plywood/40 bg-plywood/5 p-3 max-w-2xl" open>
 				<summary class="cursor-pointer text-xs font-semibold text-plywood select-none">
 					Ways to reduce waste
 				</summary>
