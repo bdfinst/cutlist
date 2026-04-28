@@ -144,17 +144,37 @@
 						<p class="text-[11px] font-semibold text-shop-text uppercase tracking-wide">
 							Near-miss pairings
 						</p>
-						<ul class="mt-1 space-y-1 text-xs text-shop-text">
+						<ul class="mt-1 space-y-2 text-xs text-shop-text">
 							{#each store.pairingHints as hint}
 								{@const pairLabel = hint.selfPair
 									? `2× "${hint.pieceA.label || 'Unnamed'}"`
 									: `"${hint.pieceA.label || 'Unnamed'}" + "${hint.pieceB.label || 'Unnamed'}"`}
 								{@const stackName = hint.axis === 'column' ? 'column' : 'row'}
+								{@const trimResolutions = hint.resolutions.filter((r) => r.kind === 'trim')}
+								{@const hasTolerance = hint.resolutions.some(
+									(r) => r.kind === 'enable-tolerance'
+								)}
 								<li>
-									{pairLabel} in a {hint.sharedDim}″ {stackName} sums to
-									<span class="font-mono">{(hint.pairedLength + hint.kerf).toFixed(3)}″</span>,
-									off the {hint.sheetDim}″ sheet by
-									<span class="font-mono text-kerf">{hint.overshoot.toFixed(3)}″</span>.
+									<div>
+										{pairLabel} in a {hint.sharedDim}″ {stackName} sums to
+										<span class="font-mono">{(hint.pairedLength + hint.kerf).toFixed(3)}″</span>,
+										off the {hint.sheetDim}″ sheet by
+										<span class="font-mono text-kerf">{hint.overshoot.toFixed(3)}″</span>.
+									</div>
+									<div class="mt-1 text-shop-muted">
+										<span class="text-success font-medium">Fix:</span>
+										{#each trimResolutions as r, i}
+											{#if i > 0}<span> or </span>{/if}
+											trim
+											<span class="font-medium text-shop-text">"{r.pieceLabel || 'Unnamed'}"</span>
+											{r.dimension} from <span class="font-mono">{r.from}″</span> →
+											<span class="font-mono">{r.to.toFixed(3)}″</span>
+										{/each}
+										{#if hasTolerance}
+											, or enable
+											<span class="font-medium text-shop-text">"Allow tight pairings"</span>
+										{/if}.
+									</div>
 								</li>
 							{/each}
 						</ul>

@@ -160,6 +160,73 @@ describe('findPairingHints', () => {
 			expect(withTolerance).toHaveLength(0);
 		});
 	});
+
+	describe('resolutions', () => {
+		it('emits a single trim resolution for a self-pair, plus enable-tolerance', () => {
+			expect.assertions(5);
+			const pieces = [makePiece({ label: 'Panel', width: 14, height: 48, quantity: 2 })];
+
+			const [hint] = findPairingHints(pieces, defaultConfig);
+
+			const trims = hint.resolutions.filter((r) => r.kind === 'trim');
+			expect(trims).toHaveLength(1);
+			expect(trims[0]).toMatchObject({
+				dimension: 'height',
+				from: 48,
+				to: 48 - 0.125
+			});
+			expect(trims[0].pieceLabel).toBe('Panel');
+			expect(hint.resolutions.some((r) => r.kind === 'enable-tolerance')).toBe(true);
+			expect(hint.resolutions).toHaveLength(2);
+		});
+
+		it('emits a trim resolution per piece for a cross-pair', () => {
+			expect.assertions(3);
+			const pieces = [
+				makePiece({ label: 'EndPanel', width: 14, height: 48 }),
+				makePiece({ label: 'CenterDiv', width: 14, height: 48 })
+			];
+
+			const [hint] = findPairingHints(pieces, defaultConfig);
+
+			const trims = hint.resolutions.filter((r) => r.kind === 'trim');
+			expect(trims).toHaveLength(2);
+			const labels = trims.map((t) => t.pieceLabel).sort();
+			expect(labels).toEqual(['CenterDiv', 'EndPanel']);
+			expect(trims.every((t) => t.dimension === 'height' && t.to === 48 - 0.125)).toBe(true);
+		});
+
+		it('omits enable-tolerance when tolerance already covers the overshoot exactly', () => {
+			expect.assertions(1);
+			// Set tolerance just below overshoot so hint still fires but tolerance is already on
+			const pieces = [makePiece({ width: 14, height: 48, quantity: 2 })];
+			const config = configWith({ oversizeTolerance: 0.125 });
+
+			const hints = findPairingHints(pieces, config);
+
+			// Tolerance at exactly the overshoot suppresses the hint entirely
+			expect(hints).toHaveLength(0);
+		});
+
+		it('reports the correct dimension when one piece is rotated', () => {
+			expect.assertions(2);
+			// Piece A is 14×48 (height pairs in column); piece B is 48×14 (rotated to share width 14).
+			// The summed dim is 48 — for A that's 'height', for B that's 'width'.
+			const pieces = [
+				makePiece({ label: 'A', width: 14, height: 48 }),
+				makePiece({ label: 'B', width: 48, height: 14 })
+			];
+
+			const hints = findPairingHints(pieces, defaultConfig);
+			const colHint = hints.find((h) => h.axis === 'column' && h.sharedDim === 14)!;
+			const trims = colHint.resolutions.filter((r) => r.kind === 'trim');
+
+			const aTrim = trims.find((t) => t.pieceLabel === 'A')!;
+			const bTrim = trims.find((t) => t.pieceLabel === 'B')!;
+			expect(aTrim.dimension).toBe('height');
+			expect(bTrim.dimension).toBe('width');
+		});
+	});
 });
 
 describe('calculateCutlist with oversizeTolerance', () => {

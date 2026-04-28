@@ -3,6 +3,23 @@ import { calculateCutlist } from './algorithm';
 
 const EPSILON = 0.0001;
 
+/**
+ * A specific design change that would let a near-miss pair fit. Each pairing
+ * hint carries one or two of these — typically a trim per distinct piece, plus
+ * a config-toggle resolution if tolerance is currently off.
+ */
+export type PairingResolution =
+	| {
+			kind: 'trim';
+			pieceId: string;
+			pieceLabel: string;
+			/** Which dimension of the piece to trim (in the piece's stored orientation). */
+			dimension: 'width' | 'height';
+			from: number;
+			to: number;
+	  }
+	| { kind: 'enable-tolerance' };
+
 export interface PairingHint {
 	pieceA: { id: string; label: string; width: number; height: number };
 	pieceB: { id: string; label: string; width: number; height: number };
@@ -20,6 +37,8 @@ export interface PairingHint {
 	overshoot: number;
 	/** True if same piece pairs with itself (quantity ≥ 2). */
 	selfPair: boolean;
+	/** Concrete actions the user can take to resolve this near-miss. */
+	resolutions: PairingResolution[];
 }
 
 /**
@@ -143,6 +162,33 @@ function tryPair(
 	if (seen.has(key)) return;
 	seen.add(key);
 
+	// Map a candidate's "summed" dimension back to the piece's stored dimension.
+	// For an unrotated candidate, summed = a.h (column) or a.w (row) which equals
+	// piece.height or piece.width respectively. For a rotated candidate the mapping
+	// flips, so we identify the dim by value-matching.
+	const trimA: PairingResolution = {
+		kind: 'trim',
+		pieceId: a.piece.id,
+		pieceLabel: a.piece.label,
+		dimension: summedA === a.piece.height ? 'height' : 'width',
+		from: summedA,
+		to: summedA - overshoot
+	};
+	const resolutions: PairingResolution[] = [trimA];
+	if (!samePiece) {
+		resolutions.push({
+			kind: 'trim',
+			pieceId: b.piece.id,
+			pieceLabel: b.piece.label,
+			dimension: summedB === b.piece.height ? 'height' : 'width',
+			from: summedB,
+			to: summedB - overshoot
+		});
+	}
+	if (tolerance < kerf - EPSILON) {
+		resolutions.push({ kind: 'enable-tolerance' });
+	}
+
 	hints.push({
 		pieceA: {
 			id: a.piece.id,
@@ -162,7 +208,8 @@ function tryPair(
 		sheetDim: sheetSumDim,
 		kerf,
 		overshoot,
-		selfPair: samePiece
+		selfPair: samePiece,
+		resolutions
 	});
 }
 
