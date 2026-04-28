@@ -6,6 +6,7 @@
 	import StickyDownloadButton from './StickyDownloadButton.svelte';
 	import SuggestionsPanel from './SuggestionsPanel.svelte';
 	import BlueprintSheetIllustration from './BlueprintSheetIllustration.svelte';
+	import { wasteClass, WASTE_THRESHOLD_LOW, WASTE_THRESHOLD_HIGH } from '$lib/waste-color';
 
 	const PDF_SHEET_RASTER_WIDTH = 900;
 
@@ -17,11 +18,7 @@
 			: ''
 	);
 
-	let wasteColor = $derived(
-		store.result.totalWastePercent > 50 ? 'text-kerf' :
-		store.result.totalWastePercent > 30 ? 'text-plywood' :
-		'text-success'
-	);
+	let wasteColor = $derived(wasteClass(store.result.totalWastePercent));
 
 	async function captureSheetImages(): Promise<string[]> {
 		const containers = document.querySelectorAll<HTMLElement>('[data-sheet-index]');
@@ -80,13 +77,24 @@
 		<div class="blueprint-card flex items-center justify-between bg-shop-mid px-4 py-3 max-w-2xl">
 			<div class="flex items-center gap-4">
 				<div>
-					<div class="text-2xl font-bold text-white font-mono">{store.result.totalSheets}</div>
+					<div class="font-mono text-2xl font-bold text-white">{store.result.totalSheets}</div>
 					<div class="text-xs text-shop-muted">sheet{store.result.totalSheets === 1 ? '' : 's'}</div>
 				</div>
 				<div class="h-8 w-px bg-shop-light"></div>
 				<div>
-					<div class="text-2xl font-bold font-mono {wasteColor}">{store.result.totalWastePercent.toFixed(1)}%</div>
-					<div class="text-xs text-shop-muted">waste</div>
+					<div class="font-mono text-2xl font-bold {wasteColor}">{store.result.totalWastePercent.toFixed(1)}%</div>
+					<div class="flex items-center gap-1.5 text-xs text-shop-muted">
+						<span>waste</span>
+						<span
+							class="ml-1 inline-flex items-center gap-0.5 font-mono text-[10px] text-shop-muted/80"
+							title="Waste thresholds: green &lt; {WASTE_THRESHOLD_LOW}%, amber {WASTE_THRESHOLD_LOW}-{WASTE_THRESHOLD_HIGH}%, red &gt; {WASTE_THRESHOLD_HIGH}%"
+							aria-label="Waste thresholds: green under {WASTE_THRESHOLD_LOW}%, amber {WASTE_THRESHOLD_LOW} to {WASTE_THRESHOLD_HIGH}%, red over {WASTE_THRESHOLD_HIGH}%"
+						>
+							<span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>
+							<span class="h-1.5 w-1.5 rounded-full bg-warn" aria-hidden="true"></span>
+							<span class="h-1.5 w-1.5 rounded-full bg-danger" aria-hidden="true"></span>
+						</span>
+					</div>
 				</div>
 			</div>
 			<button
