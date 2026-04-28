@@ -1,3 +1,5 @@
-# allow crawling everything by default
+# Cut list optimizer for woodworkers — crawl freely.
 User-agent: *
 Disallow:
+
+Sitemap: /sitemap.xml
