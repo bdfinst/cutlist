@@ -12,6 +12,12 @@ import {
 	type ConfigSuggestion,
 	type TrimSuggestion
 } from './suggestions';
+import {
+	loadPersistedState,
+	savePersistedState,
+	type PersistedState,
+	type StorageLike
+} from './persistence';
 import type {
 	PieceDefinition,
 	SheetConfig,
@@ -39,6 +45,48 @@ class CutlistStore {
 	lumberTypes = $state<LumberType[]>([]);
 	lumberPieces = $state<LumberPiece[]>([]);
 	#nextColorIndex = 0;
+	#storage: StorageLike | null = null;
+
+	constructor() {
+		if (!browser) return;
+		try {
+			this.#storage = window.localStorage;
+		} catch {
+			// Storage unavailable (e.g. privacy mode) — silently skip persistence.
+			return;
+		}
+
+		this.#hydrate();
+		this.#startPersistence();
+	}
+
+	#hydrate(): void {
+		if (!this.#storage) return;
+		const data = loadPersistedState(this.#storage);
+		if (!data) return;
+		this.pieces = data.pieces;
+		this.config = { ...DEFAULT_CONFIG, ...data.config };
+		this.lumberTypes = data.lumberTypes;
+		this.lumberPieces = data.lumberPieces;
+		this.#nextColorIndex = data.nextColorIndex;
+	}
+
+	#startPersistence(): void {
+		const storage = this.#storage;
+		if (!storage) return;
+		$effect.root(() => {
+			$effect(() => {
+				const snapshot: PersistedState = {
+					pieces: $state.snapshot(this.pieces) as PieceDefinition[],
+					config: $state.snapshot(this.config) as SheetConfig,
+					lumberTypes: $state.snapshot(this.lumberTypes) as LumberType[],
+					lumberPieces: $state.snapshot(this.lumberPieces) as LumberPiece[],
+					nextColorIndex: this.#nextColorIndex
+				};
+				savePersistedState(storage, snapshot);
+			});
+		});
+	}
 
 	readonly result: CutlistResult = $derived(calculateCutlist(this.pieces, this.config));
 	readonly pairingHints: PairingHint[] = $derived(findPairingHints(this.pieces, this.config));
@@ -174,6 +222,8 @@ class CutlistStore {
 		this.lumberPieces = [];
 		this.config = { ...DEFAULT_CONFIG };
 		this.#nextColorIndex = 0;
+		// Persistence $effect picks up the state mutations and saves the cleared
+		// snapshot — equivalent to a fresh hydrate on next load.
 	}
 }
 
