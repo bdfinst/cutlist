@@ -136,38 +136,45 @@
 		</div>
 
 		<!-- About / SEO descriptive content -->
-		<section
-			aria-label="About Cutlist"
-			class="mt-12 max-w-3xl text-sm leading-relaxed text-shop-muted space-y-4"
-		>
-			<h2 class="text-base font-semibold text-shop-text">
-				Free cut list optimizer for woodworkers
-			</h2>
-			<p>
-				Cutlist is a free, browser-based cut list calculator that plans efficient
-				layouts for plywood, MDF, and other sheet goods, plus dimensional lumber
-				like 1&times;4 and 2&times;4 boards. It runs entirely in your browser —
-				there's no sign-up, nothing to install, and your part list never leaves
-				your device.
-			</p>
-			<p>
-				The optimizer uses kerf-aware guillotine bin packing for sheet goods, so
-				every cut goes edge-to-edge the way a panel saw or table saw actually
-				works. You can lock the grain direction for face-grain pieces, set the
-				blade kerf, and toggle tight pairings for cuts that share a kerf. For
-				boards, it does 1D bin packing across multiple lumber types.
-			</p>
-			<p>
-				Import a CSV part list, paste in pieces by hand, or load the example
-				file. When you're done, download a printable PDF cut diagram with the
-				layout for each sheet, every lumber board, and a complete parts list to
-				take to the shop.
-			</p>
-			<p>
-				Built for cabinet shops, hobbyist woodworkers, closet builders, and
-				anyone who needs to make the most of a 4&times;8 sheet of plywood
-				without paying for cut list software.
-			</p>
-		</section>
+		<details class="mt-12 max-w-3xl">
+			<summary
+				class="cursor-pointer text-base font-semibold text-shop-muted hover:text-shop-text"
+			>
+				About Cutlist
+			</summary>
+			<div
+				aria-label="About Cutlist"
+				class="mt-4 text-sm leading-relaxed text-shop-muted space-y-4"
+			>
+				<h2 class="text-base font-semibold text-shop-text">
+					Free cut list optimizer for woodworkers
+				</h2>
+				<p>
+					Cutlist is a free, browser-based cut list calculator that plans efficient
+					layouts for plywood, MDF, and other sheet goods, plus dimensional lumber
+					like 1&times;4 and 2&times;4 boards. It runs entirely in your browser —
+					there's no sign-up, nothing to install, and your part list never leaves
+					your device.
+				</p>
+				<p>
+					The optimizer uses kerf-aware guillotine bin packing for sheet goods, so
+					every cut goes edge-to-edge the way a panel saw or table saw actually
+					works. You can lock the grain direction for face-grain pieces, set the
+					blade kerf, and toggle tight pairings for cuts that share a kerf. For
+					boards, it does 1D bin packing across multiple lumber types.
+				</p>
+				<p>
+					Import a CSV part list, paste in pieces by hand, or load the example
+					file. When you're done, download a printable PDF cut diagram with the
+					layout for each sheet, every lumber board, and a complete parts list to
+					take to the shop.
+				</p>
+				<p>
+					Built for cabinet shops, hobbyist woodworkers, closet builders, and
+					anyone who needs to make the most of a 4&times;8 sheet of plywood
+					without paying for cut list software.
+				</p>
+			</div>
+		</details>
 	</main>
 </div>
