@@ -169,6 +169,13 @@ class CutlistStore {
 		);
 	}
 
+	/** Replace the available lengths with a single value — used by the simplified UI. */
+	setLumberLength(typeId: string, length: number): void {
+		this.lumberTypes = this.lumberTypes.map((t) =>
+			t.id === typeId ? { ...t, availableLengths: [length] } : t
+		);
+	}
+
 	// --- Lumber pieces ---
 
 	addLumberPiece(label: string, length: number, quantity: number, lumberTypeId?: string): void {
