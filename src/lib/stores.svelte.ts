@@ -24,7 +24,8 @@ import type {
 	CutlistResult,
 	LumberType,
 	LumberPiece,
-	LumberResult
+	LumberResult,
+	CutlistMode
 } from './types';
 
 export const DEFAULT_PIECE_WIDTH = 12;
@@ -54,6 +55,7 @@ class CutlistStore {
 	lumberTypes = $state<LumberType[]>([]);
 	lumberPieces = $state<LumberPiece[]>([]);
 	lastImportNotice = $state<ImportNotice | null>(null);
+	mode = $state<CutlistMode>('plywood');
 	#nextColorIndex = 0;
 	#storage: StorageLike | null = null;
 	#noticeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -80,6 +82,16 @@ class CutlistStore {
 		this.lumberTypes = data.lumberTypes;
 		this.lumberPieces = data.lumberPieces;
 		this.#nextColorIndex = data.nextColorIndex;
+		if (data.mode) {
+			this.mode = data.mode;
+		} else {
+			// Pre-slice persisted state — pick a sensible default so existing
+			// users with lumber data don't suddenly see it disappear.
+			this.mode =
+				data.lumberTypes.length > 0 || data.lumberPieces.length > 0
+					? 'both'
+					: 'plywood';
+		}
 	}
 
 	#startPersistence(): void {
@@ -92,7 +104,8 @@ class CutlistStore {
 					config: $state.snapshot(this.config) as SheetConfig,
 					lumberTypes: $state.snapshot(this.lumberTypes) as LumberType[],
 					lumberPieces: $state.snapshot(this.lumberPieces) as LumberPiece[],
-					nextColorIndex: this.#nextColorIndex
+					nextColorIndex: this.#nextColorIndex,
+					mode: this.mode
 				};
 				savePersistedState(storage, snapshot);
 			});
@@ -164,6 +177,12 @@ class CutlistStore {
 
 	applyConfig(updates: Partial<SheetConfig>): void {
 		this.updateConfig(updates);
+	}
+
+	// --- Mode ---
+
+	setMode(mode: CutlistMode): void {
+		this.mode = mode;
 	}
 
 	// --- Lumber types ---
@@ -265,6 +284,7 @@ class CutlistStore {
 		this.lumberTypes = [];
 		this.lumberPieces = [];
 		this.config = { ...DEFAULT_CONFIG };
+		this.mode = 'plywood';
 		this.#nextColorIndex = 0;
 		// Persistence $effect picks up the state mutations and saves the cleared
 		// snapshot — equivalent to a fresh hydrate on next load.

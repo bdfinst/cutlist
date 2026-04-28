@@ -5,6 +5,9 @@
 	import LumberTypeList from '$lib/components/LumberTypeList.svelte';
 	import LumberPieceList from '$lib/components/LumberPieceList.svelte';
 	import LumberResults from '$lib/components/LumberResults.svelte';
+	import ModeSelector from '$lib/components/ModeSelector.svelte';
+	import KerfInput from '$lib/components/KerfInput.svelte';
+	import { store } from '$lib/stores.svelte';
 </script>
 
 <svelte:head>
@@ -97,19 +100,31 @@
 		<div class="flex flex-col gap-6 lg:flex-row">
 			<!-- Left panel: inputs -->
 			<section aria-label="Piece configuration" class="w-full space-y-5 lg:w-[28rem] lg:shrink-0">
-				<SheetConfig />
+				<ModeSelector />
 				<div class="border-t border-shop-light"></div>
-				<PieceList />
-				<div class="border-t border-shop-light"></div>
-				<LumberTypeList />
-				<div class="border-t border-shop-light"></div>
-				<LumberPieceList />
+				{#if store.mode !== 'lumber'}
+					<SheetConfig />
+					<div class="border-t border-shop-light"></div>
+					<PieceList />
+				{:else}
+					<KerfInput />
+				{/if}
+				{#if store.mode !== 'plywood'}
+					<div class="border-t border-shop-light"></div>
+					<LumberTypeList />
+					<div class="border-t border-shop-light"></div>
+					<LumberPieceList />
+				{/if}
 			</section>
 
 			<!-- Right panel: results -->
 			<section aria-label="Layout results" class="min-w-0 flex-1 space-y-6">
-				<LayoutResults />
-				<LumberResults />
+				{#if store.mode !== 'lumber'}
+					<LayoutResults />
+				{/if}
+				{#if store.mode !== 'plywood'}
+					<LumberResults />
+				{/if}
 			</section>
 		</div>
 

@@ -2,7 +2,8 @@ import type {
 	PieceDefinition,
 	SheetConfig,
 	LumberType,
-	LumberPiece
+	LumberPiece,
+	CutlistMode
 } from './types';
 
 /**
@@ -17,6 +18,7 @@ export interface PersistedState {
 	lumberTypes: LumberType[];
 	lumberPieces: LumberPiece[];
 	nextColorIndex: number;
+	mode?: CutlistMode;
 }
 
 /** Minimal Storage interface — accepts real localStorage or a mock. */
