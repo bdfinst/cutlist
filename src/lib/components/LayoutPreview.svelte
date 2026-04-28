@@ -11,8 +11,8 @@
 	);
 </script>
 
-<div class="space-y-2 max-w-md" data-sheet-index={sheet.sheetIndex}>
-	<div class="flex items-baseline justify-between">
+<div class="space-y-2 max-w-md scroll-mt-20" data-sheet-index={sheet.sheetIndex}>
+	<div class="sticky top-14 z-[5] flex items-baseline justify-between bg-shop-dark/90 py-1 backdrop-blur-sm motion-reduce:backdrop-blur-none">
 		<h3 class="text-sm font-semibold text-white">
 			Sheet {sheet.sheetIndex + 1}
 		</h3>
