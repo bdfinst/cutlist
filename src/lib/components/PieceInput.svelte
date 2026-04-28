@@ -19,81 +19,85 @@
 </script>
 
 <li class="group rounded-lg border border-shop-light/60 bg-shop-mid p-2.5 transition-colors hover:border-shop-muted/50">
-	<div class="flex items-center gap-2">
-		<!-- Color swatch -->
-		<div
-			class="h-3 w-3 shrink-0 rounded-sm ring-1 ring-white/10"
-			style:background-color={piece.color}
-			role="img"
-			aria-label="Color indicator for {piece.label || 'piece'}"
-		></div>
-
-		<!-- Label -->
-		<label class="sr-only" for="piece-label-{piece.id}">Piece name</label>
-		<input
-			id="piece-label-{piece.id}"
-			type="text"
-			value={piece.label}
-			oninput={(e) => store.updatePiece(piece.id, { label: e.currentTarget.value })}
-			placeholder="Name"
-			class="min-w-0 flex-1 rounded bg-transparent border border-transparent px-1.5 py-1 text-sm text-white placeholder:text-shop-muted transition-colors focus:border-shop-light focus:bg-shop-dark focus:outline-none focus:ring-1 focus:ring-plywood/30"
-		/>
-
-		<!-- Dimensions -->
-		<div class="flex items-center gap-1 text-xs text-shop-muted shrink-0">
-			<label class="sr-only" for="piece-width-{piece.id}">Width (in)</label>
+	<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+		<!-- Label row (full-width on mobile, flex item on desktop) -->
+		<div class="flex min-w-0 flex-1 items-center gap-2">
+			<div
+				class="h-3 w-3 shrink-0 rounded-sm ring-1 ring-white/10"
+				style:background-color={piece.color}
+				role="img"
+				aria-label="Color indicator for {piece.label || 'piece'}"
+			></div>
+			<label class="sr-only" for="piece-label-{piece.id}">Piece name</label>
 			<input
-				id="piece-width-{piece.id}"
-				type="number"
-				value={piece.width}
-				oninput={(e) => store.updatePiece(piece.id, { width: parseFloat(e.currentTarget.value) || 0 })}
-				step={DIMENSION_STEP}
-				min="0.125"
-				class="w-14 {numBase} {widthInvalid ? numError : numValid}"
-				aria-invalid={widthInvalid}
-				aria-describedby={hasErrors ? errorId : undefined}
-			/>
-			<span aria-hidden="true" class="text-shop-muted/60">&times;</span>
-			<label class="sr-only" for="piece-height-{piece.id}">Length (in)</label>
-			<input
-				id="piece-height-{piece.id}"
-				type="number"
-				value={piece.height}
-				oninput={(e) => store.updatePiece(piece.id, { height: parseFloat(e.currentTarget.value) || 0 })}
-				step={DIMENSION_STEP}
-				min="0.125"
-				class="w-14 {numBase} {heightInvalid ? numError : numValid}"
-				aria-invalid={heightInvalid}
-				aria-describedby={hasErrors ? errorId : undefined}
+				id="piece-label-{piece.id}"
+				type="text"
+				value={piece.label}
+				title={piece.label}
+				oninput={(e) => store.updatePiece(piece.id, { label: e.currentTarget.value })}
+				placeholder="Name"
+				class="min-w-0 flex-1 rounded bg-transparent border border-transparent px-1.5 py-1 text-sm text-white placeholder:text-shop-muted transition-colors focus:border-shop-light focus:bg-shop-dark focus:outline-none focus:ring-1 focus:ring-plywood/30"
 			/>
 		</div>
 
-		<!-- Quantity -->
-		<label class="sr-only" for="piece-qty-{piece.id}">Quantity</label>
-		<div class="flex items-center gap-1 shrink-0">
-			<span class="text-xs text-shop-muted">&times;</span>
-			<input
-				id="piece-qty-{piece.id}"
-				type="number"
-				value={piece.quantity}
-				oninput={(e) => store.updatePiece(piece.id, { quantity: parseInt(e.currentTarget.value) || 1 })}
-				min="1"
-				class="w-10 {numBase} text-center {qtyInvalid ? numError : numValid}"
-				aria-invalid={qtyInvalid}
-				aria-describedby={hasErrors ? errorId : undefined}
-			/>
-		</div>
+		<!-- Dimensions + qty + remove (own row on mobile) -->
+		<div class="flex items-center gap-2 sm:shrink-0">
+			<div class="flex items-center gap-1 text-xs text-shop-muted">
+				<label class="sr-only" for="piece-width-{piece.id}">Width (in)</label>
+				<input
+					id="piece-width-{piece.id}"
+					type="number"
+					inputmode="decimal"
+					value={piece.width}
+					oninput={(e) => store.updatePiece(piece.id, { width: parseFloat(e.currentTarget.value) || 0 })}
+					step={DIMENSION_STEP}
+					min="0.125"
+					class="w-20 text-right tabular-nums {numBase} {widthInvalid ? numError : numValid}"
+					aria-invalid={widthInvalid}
+					aria-describedby={hasErrors ? errorId : undefined}
+				/>
+				<span aria-hidden="true" class="text-shop-muted/60">&times;</span>
+				<label class="sr-only" for="piece-height-{piece.id}">Length (in)</label>
+				<input
+					id="piece-height-{piece.id}"
+					type="number"
+					inputmode="decimal"
+					value={piece.height}
+					oninput={(e) => store.updatePiece(piece.id, { height: parseFloat(e.currentTarget.value) || 0 })}
+					step={DIMENSION_STEP}
+					min="0.125"
+					class="w-20 text-right tabular-nums {numBase} {heightInvalid ? numError : numValid}"
+					aria-invalid={heightInvalid}
+					aria-describedby={hasErrors ? errorId : undefined}
+				/>
+			</div>
 
-		<!-- Remove -->
-		<button
-			onclick={() => store.removePiece(piece.id)}
-			class="shrink-0 rounded p-1 text-shop-muted opacity-0 group-hover:opacity-100 transition-all duration-150 hover:text-danger hover:bg-danger/10 hover:scale-110 active:scale-95 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
-			aria-label="Remove {piece.label || 'piece'}"
-		>
-			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-				<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-			</svg>
-		</button>
+			<label class="sr-only" for="piece-qty-{piece.id}">Quantity</label>
+			<div class="flex items-center gap-1">
+				<span aria-hidden="true" class="text-xs text-shop-muted">&times;</span>
+				<input
+					id="piece-qty-{piece.id}"
+					type="number"
+					inputmode="numeric"
+					value={piece.quantity}
+					oninput={(e) => store.updatePiece(piece.id, { quantity: parseInt(e.currentTarget.value) || 1 })}
+					min="1"
+					class="w-12 text-center tabular-nums {numBase} {qtyInvalid ? numError : numValid}"
+					aria-invalid={qtyInvalid}
+					aria-describedby={hasErrors ? errorId : undefined}
+				/>
+			</div>
+
+			<button
+				onclick={() => store.removePiece(piece.id)}
+				class="ml-auto shrink-0 rounded p-1 text-shop-muted transition-all duration-150 hover:text-danger hover:bg-danger/10 hover:scale-110 active:scale-95 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
+				aria-label="Remove {piece.label || 'piece'}"
+			>
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+				</svg>
+			</button>
+		</div>
 	</div>
 
 	{#if hasErrors}
