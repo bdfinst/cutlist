@@ -75,15 +75,14 @@
 	<header class="border-b border-shop-light bg-shop-mid/50 backdrop-blur-sm sticky top-0 z-10">
 		<div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 flex items-center justify-between">
 			<div class="flex items-center gap-3">
-				<div class="flex items-center gap-1.5">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-plywood">
-						<rect x="2" y="2" width="20" height="20" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-						<line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2"/>
-						<line x1="12" y1="2" x2="12" y2="22" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2"/>
-						<rect x="3" y="3" width="8" height="6" rx="0.5" fill="currentColor" opacity="0.3"/>
-						<rect x="13" y="3" width="8" height="6" rx="0.5" fill="currentColor" opacity="0.2"/>
-						<rect x="3" y="11" width="8" height="10" rx="0.5" fill="currentColor" opacity="0.15"/>
-					</svg>
+				<div class="flex items-center gap-2">
+					<img
+						src="/favicon.svg"
+						width="28"
+						height="28"
+						alt=""
+						class="block"
+					/>
 					<h1 class="text-lg font-semibold tracking-tight text-white">Cutlist</h1>
 				</div>
 				<span class="text-xs text-shop-muted font-mono hidden sm:block">cut optimizer</span>

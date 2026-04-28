@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Cutlist">
+  <title>Cutlist</title>
+  <!-- Rounded square background -->
+  <rect x="2" y="2" width="60" height="60" rx="9" fill="#EDE0CB" stroke="#7B4D27" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Internal cut grid (Mondrian-ish layout) -->
+  <g fill="#EDE0CB" stroke="#7B4D27" stroke-width="2.5" stroke-linejoin="round">
+    <!-- Top-left tall pair -->
+    <rect x="7" y="7" width="14" height="20"/>
+    <rect x="7" y="29" width="14" height="14"/>
+    <!-- Top-middle wide -->
+    <rect x="23" y="7" width="20" height="14"/>
+    <!-- Top-right tall -->
+    <rect x="45" y="7" width="12" height="20"/>
+    <!-- Middle wide horizontal (orange highlighted piece) -->
+    <rect x="23" y="23" width="34" height="10" fill="#D86F1C"/>
+    <!-- Bottom row -->
+    <rect x="7" y="45" width="20" height="12"/>
+    <rect x="29" y="35" width="14" height="22"/>
+    <rect x="45" y="35" width="12" height="22"/>
+  </g>
+</svg>

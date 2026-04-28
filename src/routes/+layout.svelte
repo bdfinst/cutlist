@@ -1,9 +1,17 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
 
 	let { children } = $props();
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<svelte:head>
+	<!-- SVG favicon for modern browsers (scales perfectly at any size) -->
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<!-- Fallback ICO for older browsers / pinned tabs -->
+	<link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
+	<!-- iOS home-screen icon -->
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+	<!-- Web manifest enables PWA install + Android home-screen icon -->
+	<link rel="manifest" href="/manifest.webmanifest" />
+</svelte:head>
 {@render children()}
