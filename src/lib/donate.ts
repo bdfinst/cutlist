@@ -5,22 +5,15 @@ export function isDonateEnabled(flag: string | undefined): boolean {
 }
 
 export function buildCheckoutSessionParams({
-	origin
+	origin,
+	priceId
 }: {
 	origin: string;
+	priceId: string;
 }): Stripe.Checkout.SessionCreateParams {
 	return {
 		mode: 'payment',
-		line_items: [
-			{
-				price_data: {
-					currency: 'usd',
-					product_data: { name: 'Cutlist Calculator donation' },
-					custom_unit_amount: { enabled: true, minimum_amount: 100 }
-				},
-				quantity: 1
-			}
-		],
+		line_items: [{ price: priceId, quantity: 1 }],
 		success_url: `${origin}/?donation=thanks`,
 		cancel_url: `${origin}/?donation=cancelled`
 	};

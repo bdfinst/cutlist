@@ -49,54 +49,49 @@ describe('isDonateEnabled', () => {
 
 describe('buildCheckoutSessionParams', () => {
 	const origin = 'https://cutlist.example.com';
+	const priceId = 'price_test_donation_open_amount';
 
 	it('returns mode "payment" for one-time donations', () => {
-		const params = buildCheckoutSessionParams({ origin });
+		const params = buildCheckoutSessionParams({ origin, priceId });
 		expect(params.mode).toBe('payment');
 	});
 
 	it('returns exactly one line item', () => {
-		const params = buildCheckoutSessionParams({ origin });
+		const params = buildCheckoutSessionParams({ origin, priceId });
 		expect(params.line_items).toHaveLength(1);
 	});
 
-	it('uses currency "usd" on the line item', () => {
-		const params = buildCheckoutSessionParams({ origin });
-		expect(params.line_items?.[0]?.price_data?.currency).toBe('usd');
+	it('references the supplied Price ID on the line item', () => {
+		const params = buildCheckoutSessionParams({ origin, priceId });
+		expect(params.line_items?.[0]?.price).toBe(priceId);
 	});
 
-	it('enables custom_unit_amount with $1.00 minimum (100 cents)', () => {
-		const params = buildCheckoutSessionParams({ origin });
-		const customAmount = params.line_items?.[0]?.price_data?.custom_unit_amount;
-		expect(customAmount?.enabled).toBe(true);
-		expect(customAmount?.minimum_amount).toBe(100);
-	});
-
-	it('names the product "Cutlist Calculator donation"', () => {
-		const params = buildCheckoutSessionParams({ origin });
-		expect(params.line_items?.[0]?.price_data?.product_data?.name).toBe(
-			'Cutlist Calculator donation'
-		);
+	it('does not include any inline price_data on the line item', () => {
+		const params = buildCheckoutSessionParams({ origin, priceId });
+		expect(params.line_items?.[0]?.price_data).toBeUndefined();
 	});
 
 	it('returns success_url at <origin>/?donation=thanks', () => {
-		const params = buildCheckoutSessionParams({ origin });
+		const params = buildCheckoutSessionParams({ origin, priceId });
 		expect(params.success_url).toBe('https://cutlist.example.com/?donation=thanks');
 	});
 
 	it('returns cancel_url at <origin>/?donation=cancelled', () => {
-		const params = buildCheckoutSessionParams({ origin });
+		const params = buildCheckoutSessionParams({ origin, priceId });
 		expect(params.cancel_url).toBe('https://cutlist.example.com/?donation=cancelled');
 	});
 
 	it('uses the provided origin verbatim with no trailing-slash injection', () => {
-		const params = buildCheckoutSessionParams({ origin: 'http://localhost:5173' });
+		const params = buildCheckoutSessionParams({
+			origin: 'http://localhost:5173',
+			priceId
+		});
 		expect(params.success_url).toBe('http://localhost:5173/?donation=thanks');
 		expect(params.cancel_url).toBe('http://localhost:5173/?donation=cancelled');
 	});
 
 	it('sets quantity to 1', () => {
-		const params = buildCheckoutSessionParams({ origin });
+		const params = buildCheckoutSessionParams({ origin, priceId });
 		expect(params.line_items?.[0]?.quantity).toBe(1);
 	});
 });

@@ -22,9 +22,12 @@ the button does not render — even if `STRIPE_SECRET_KEY` is present on the ser
 This guarantees a consistent rule: a missing public flag means no donation UI,
 ever, with no fallback URL.
 
-`STRIPE_SECRET_KEY` lives **only** on the server, read via SvelteKit's
-`$env/static/private`. It is never bundled to the client and never carries the
-`PUBLIC_` prefix.
+`STRIPE_SECRET_KEY` and `STRIPE_DONATION_PRICE_ID` live **only** on the server,
+read via SvelteKit's `$env/dynamic/private`. They are never bundled to the
+client and never carry the `PUBLIC_` prefix. The Price ID points to a Stripe
+Price configured with `custom_unit_amount.enabled=true` (open amount, $1.00
+minimum) — Stripe's API requires this `custom_unit_amount` field to live on a
+pre-created Price object, not on inline `price_data` in a Checkout Session.
 
 ---
 
@@ -36,6 +39,7 @@ Feature: Support the Cutlist Calculator via Stripe Checkout
   Background:
     Given the build was configured with PUBLIC_STRIPE_DONATE_ENABLED=true
     And the server has a valid STRIPE_SECRET_KEY
+    And the server has a valid STRIPE_DONATION_PRICE_ID pointing to an open-amount Price
 
   Scenario: Support button is visible in the header on desktop
     Given I am on the Cutlist Calculator page on a desktop-width viewport
@@ -77,9 +81,9 @@ Feature: Support the Cutlist Calculator via Stripe Checkout
     And the button is re-enabled so I can retry
     And no new tab opens
 
-  Scenario: Server has no STRIPE_SECRET_KEY configured
+  Scenario: Server has no STRIPE_SECRET_KEY or STRIPE_DONATION_PRICE_ID configured
     Given the build flag PUBLIC_STRIPE_DONATE_ENABLED=true
-    But STRIPE_SECRET_KEY is not configured on the server
+    But either STRIPE_SECRET_KEY or STRIPE_DONATION_PRICE_ID is not configured on the server
     When I click the "Support" button
     Then the API responds 503
     And I see the inline error message
@@ -109,15 +113,16 @@ Feature: Support the Cutlist Calculator via Stripe Checkout
 
 ### Components
 
-- **New** `src/lib/donate.ts` — pure helpers, server-and-client safe (no Stripe SDK import here):
+- **New** `src/lib/donate.ts` — pure helpers, server-and-client safe (no Stripe SDK import here, only a `type` import):
   - `isDonateEnabled(flag: string | undefined): boolean` — returns `true` only when the trimmed value equals the string `"true"` exactly. All other values (including `"True"`, `"1"`, `"yes"`) return `false`.
-  - `buildCheckoutSessionParams({ origin }: { origin: string }): Stripe.Checkout.SessionCreateParams` — builds the session payload (mode, line items with `custom_unit_amount`, success/cancel URLs). Pure function for unit testability.
+  - `buildCheckoutSessionParams({ origin, priceId }: { origin: string; priceId: string }): Stripe.Checkout.SessionCreateParams` — builds the session payload (mode, line item referencing the supplied Price ID, success/cancel URLs). Pure function for unit testability.
 
 - **New** `src/routes/api/donate/+server.ts` — SvelteKit POST endpoint:
-  - Reads `STRIPE_SECRET_KEY` via `$env/static/private`. Returns `503 { error: 'Donations not configured' }` if missing.
+  - Reads `env.STRIPE_SECRET_KEY` and `env.STRIPE_DONATION_PRICE_ID` via `$env/dynamic/private` (runtime read; missing values return `undefined` without breaking the build). Returns `503 { error: 'Donations not configured' }` if either is missing or empty.
   - Imports `Stripe` from `stripe` (Node SDK, server-only).
-  - Calls `stripe.checkout.sessions.create(buildCheckoutSessionParams({ origin: url.origin }))`.
-  - Returns `200 { url: session.url }` on success, `502 { error: '...' }` on Stripe API failure.
+  - Calls `stripe.checkout.sessions.create(buildCheckoutSessionParams({ origin: url.origin, priceId }))`.
+  - Returns `200 { url: session.url }` on success, `502 { error: '...' }` on Stripe API failure or a session without a URL.
+  - Ignores all client-supplied request body fields in v1.
   - Logs failures to stderr without including request bodies or PII.
 
 - **New** `src/lib/components/DonateButton.svelte` — client component:
@@ -133,6 +138,7 @@ Feature: Support the Cutlist Calculator via Stripe Checkout
 ### Configuration
 
 - `STRIPE_SECRET_KEY` — server-only secret. Set in Netlify Environment variables (Functions or All scopes). Local dev: `.env.local` (gitignored). MUST NOT have a `PUBLIC_` prefix.
+- `STRIPE_DONATION_PRICE_ID` — server-only Price ID (e.g. `price_1Abc…`). Points to a Stripe Price configured with `custom_unit_amount.enabled=true` and `minimum_amount=100`. Created once via the Stripe dashboard or API. MUST NOT have a `PUBLIC_` prefix.
 - `PUBLIC_STRIPE_DONATE_ENABLED` — build-time public flag. Set to the literal string `"true"` to render the button. Anything else (or unset) hides it.
 
 ### Dependencies
@@ -140,9 +146,10 @@ Feature: Support the Cutlist Calculator via Stripe Checkout
 - New runtime dep: **`stripe`** (Node SDK, server-only). Imported exclusively in `+server.ts`. Must not appear in any module that is bundled to the client.
 - Stripe Checkout Session config:
   - `mode: 'payment'`
-  - `line_items: [{ price_data: { currency: 'usd', product_data: { name: 'Cutlist Calculator donation' }, custom_unit_amount: { enabled: true, minimum_amount: 100 } }, quantity: 1 }]`
+  - `line_items: [{ price: STRIPE_DONATION_PRICE_ID, quantity: 1 }]`
   - `success_url: ${origin}/?donation=thanks`
   - `cancel_url: ${origin}/?donation=cancelled`
+- The Stripe Price referenced by `STRIPE_DONATION_PRICE_ID` is configured (in the Stripe dashboard) with `custom_unit_amount.enabled=true`, `minimum_amount=100`, currency `usd`, attached to a "Cutlist Calculator donation" product.
 - Currency on the Session is `usd`. Buyer-side localization relies on Stripe's account-level **Adaptive Pricing** setting (Dashboard → Settings → Adaptive Pricing). No code-level currency detection.
 
 ### Constraints
@@ -172,9 +179,10 @@ Functional:
 - [ ] When `PUBLIC_STRIPE_DONATE_ENABLED=true`, a "Support" button renders in the header on desktop (≥ 768 px) and mobile (≥ 360 px) widths with no horizontal overflow.
 - [ ] When the flag is unset or any value other than the literal string `"true"`, no Support button renders, and no `/api/donate` request is issued at any time.
 - [ ] Clicking the button POSTs to `/api/donate` and, on a 200 response, calls `window.open(url, '_blank', 'noopener,noreferrer')`.
-- [ ] The Checkout Session created by the server has: `mode: 'payment'`, currency `usd`, `custom_unit_amount.enabled: true`, `custom_unit_amount.minimum_amount: 100`, `success_url` ending in `/?donation=thanks`, `cancel_url` ending in `/?donation=cancelled`.
+- [ ] The Checkout Session created by the server has: `mode: 'payment'`, `line_items[0].price === STRIPE_DONATION_PRICE_ID`, no inline `price_data`, `success_url` ending in `/?donation=thanks`, `cancel_url` ending in `/?donation=cancelled`.
+- [ ] The referenced Stripe Price is configured (off-codebase, in Stripe) as open-amount with `custom_unit_amount.enabled=true` and `minimum_amount=100` in `usd`.
 - [ ] On API error or fetch failure, an inline error message appears in an `aria-live="polite"` region, the button re-enables, and no new tab opens.
-- [ ] When `STRIPE_SECRET_KEY` is missing, the route returns 503; the client surfaces the inline error.
+- [ ] When `STRIPE_SECRET_KEY` or `STRIPE_DONATION_PRICE_ID` is missing or empty, the route returns 503; the client surfaces the inline error.
 
 Security:
 - [ ] `grep -r STRIPE_SECRET_KEY .svelte-kit/output/client` finds zero matches after a production build.
@@ -209,7 +217,7 @@ Quality:
 - [x] Intent unambiguous — two developers would interpret it the same way.
 - [x] Every behavior in intent has at least one Gherkin scenario.
 - [x] Architecture constrains implementation to what intent requires; no over-engineering (no webhooks, no toasts, no rate limiting in v1).
-- [x] Naming consistent across artifacts: "Support" button, `STRIPE_SECRET_KEY`, `PUBLIC_STRIPE_DONATE_ENABLED`, `/api/donate`, `?donation=thanks`, `?donation=cancelled`, `custom_unit_amount`, `minimum_amount: 100`.
+- [x] Naming consistent across artifacts: "Support" button, `STRIPE_SECRET_KEY`, `STRIPE_DONATION_PRICE_ID`, `PUBLIC_STRIPE_DONATE_ENABLED`, `/api/donate`, `?donation=thanks`, `?donation=cancelled`.
 - [x] No artifact contradicts another.
 
 **Verdict: PASS.** Ready to plan implementation.
@@ -220,7 +228,7 @@ Quality:
 
 - Path: **Stripe Checkout via SvelteKit `+server.ts`** (supersedes prior Payment Link decision after maintainer confirmed customer-chosen amount was unavailable for their account).
 - Function host: **SvelteKit API route** at `/api/donate` — auto-deployed as a Netlify Function via adapter-netlify.
-- Donor enters amount: **on Stripe's hosted Checkout page** (`custom_unit_amount`), not on our page.
+- Donor enters amount: **on Stripe's hosted Checkout page** via a pre-created Price with `custom_unit_amount.enabled=true`. (Stripe's API does not allow `custom_unit_amount` on inline `price_data`; it must live on a Price object referenced by `STRIPE_DONATION_PRICE_ID`.)
 - Tab behavior: **new tab** via `window.open` with `noopener,noreferrer`.
 - Hide-button toggle: **build-time public flag** `PUBLIC_STRIPE_DONATE_ENABLED`. The secret key alone never reveals the button.
 - Currency: **USD** at the API layer; rely on **Stripe Adaptive Pricing** (dashboard setting) for buyer-localized display.

@@ -19,9 +19,9 @@ render and no `/api/donate` request is ever made. The Stripe Node SDK and
 - [ ] When `PUBLIC_STRIPE_DONATE_ENABLED=true`, the Support button renders in the header on desktop and mobile widths.
 - [ ] When the flag is unset or any value other than the literal string `"true"`, no button renders and no `/api/donate` request is issued.
 - [ ] Clicking the button POSTs to `/api/donate`; on 200 response, the returned `url` opens via `window.open(url, '_blank', 'noopener,noreferrer')`.
-- [ ] The Checkout Session has `mode: 'payment'`, currency `usd`, `custom_unit_amount.minimum_amount: 100`, `success_url` ending `/?donation=thanks`, `cancel_url` ending `/?donation=cancelled`.
+- [ ] The Checkout Session has `mode: 'payment'`, `line_items[0].price === STRIPE_DONATION_PRICE_ID`, no inline `price_data`, `success_url` ending `/?donation=thanks`, `cancel_url` ending `/?donation=cancelled`. The referenced Stripe Price is configured (off-codebase) as open-amount with $1.00 minimum in USD.
 - [ ] On API failure, an inline error appears in an `aria-live="polite"` region, the button re-enables, and no tab opens.
-- [ ] When `STRIPE_SECRET_KEY` is missing, the route returns 503 with `{ error: 'Donations not configured' }`.
+- [ ] When `STRIPE_SECRET_KEY` or `STRIPE_DONATION_PRICE_ID` is missing or empty, the route returns 503 with `{ error: 'Donations not configured' }`.
 - [ ] Unit tests for `isDonateEnabled`, `buildCheckoutSessionParams`, and the route handler (with mocked Stripe SDK + mocked `$env/static/private`) pass.
 - [ ] Playwright e2e (with `/api/donate` mocked) verifies popup opens to the mocked URL.
 - [ ] After production build, `STRIPE_SECRET_KEY` and `"stripe"` do not appear in `.svelte-kit/output/client/`.
