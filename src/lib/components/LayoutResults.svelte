@@ -5,6 +5,7 @@
 	import LayoutPreview from './LayoutPreview.svelte';
 	import StickyDownloadButton from './StickyDownloadButton.svelte';
 	import SuggestionsPanel from './SuggestionsPanel.svelte';
+	import BlueprintSheetIllustration from './BlueprintSheetIllustration.svelte';
 
 	const PDF_SHEET_RASTER_WIDTH = 900;
 
@@ -58,14 +59,17 @@
 </script>
 
 {#if store.pieces.length === 0}
-	<div class="flex items-center justify-center rounded-lg border border-dashed border-shop-light/40 py-20">
+	<div class="blueprint-card flex items-center justify-center bg-shop-mid/30 px-6 py-12">
 		<div class="text-center">
-			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" class="mx-auto text-shop-light mb-3">
-				<rect x="2" y="2" width="20" height="20" rx="2" stroke="currentColor" stroke-width="1"/>
-				<line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 2"/>
-				<line x1="12" y1="2" x2="12" y2="22" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 2"/>
-			</svg>
-			<p class="text-sm text-shop-muted">Add pieces to see the layout</p>
+			<div class="mx-auto mb-4 max-w-[260px]">
+				<BlueprintSheetIllustration
+					widthLabel={`${Math.max(store.config.width, store.config.height)}"`}
+					heightLabel={`${Math.min(store.config.width, store.config.height)}"`}
+				/>
+			</div>
+			<p class="font-mono text-xs uppercase tracking-widest text-shop-muted">
+				Add pieces to see the layout
+			</p>
 		</div>
 	</div>
 {:else if store.result.totalSheets === 0 && store.result.unfitPieces.length === 0}
