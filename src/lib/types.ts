@@ -1,3 +1,5 @@
+export type CutlistMode = 'plywood' | 'lumber' | 'both';
+
 export interface PieceDefinition {
 	id: string;
 	label: string;
