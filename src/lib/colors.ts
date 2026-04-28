@@ -30,5 +30,5 @@ export function getContrastColor(hex: string): string {
 	const [r, g, b] = hexToRgb(hex);
 	// Relative luminance (ITU-R BT.709)
 	const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-	return luminance > 0.5 ? '#000' : '#fff';
+	return luminance > 0.5 ? '#000000' : '#ffffff';
 }
