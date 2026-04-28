@@ -4,6 +4,7 @@
 	import { svgElementToPng } from '$lib/svg-to-image';
 	import LayoutPreview from './LayoutPreview.svelte';
 	import StickyDownloadButton from './StickyDownloadButton.svelte';
+	import SuggestionsPanel from './SuggestionsPanel.svelte';
 
 	const PDF_SHEET_RASTER_WIDTH = 900;
 
@@ -113,118 +114,7 @@
 			</div>
 		{/if}
 
-		{#if store.configSuggestions.length > 0 || store.trimSuggestions.length > 0 || store.smallStockSuggestions.length > 0 || store.pairingHints.length > 0}
-			<details class="rounded-lg border border-plywood/40 bg-plywood/5 p-3 max-w-2xl" open>
-				<summary class="cursor-pointer text-xs font-semibold text-plywood select-none">
-					Ways to reduce waste
-				</summary>
-
-				{#if store.configSuggestions.length > 0}
-					<div class="mt-3">
-						<p class="text-[11px] font-semibold text-shop-text uppercase tracking-wide">
-							Settings
-						</p>
-						<ul class="mt-1 space-y-1 text-xs text-shop-text">
-							{#each store.configSuggestions as s}
-								<li>
-									{#if s.kind === 'enable-tolerance'}
-										Enable <span class="font-medium">"Allow tight pairings"</span>
-									{:else}
-										Unlock <span class="font-medium">grain direction</span>
-									{/if}
-									→ <span class="font-mono text-success">−{s.sheetsSaved} sheet{s.sheetsSaved === 1 ? '' : 's'}</span>
-									(waste <span class="font-mono">{s.wasteBefore.toFixed(1)}%</span> →
-									<span class="font-mono">{s.wasteAfter.toFixed(1)}%</span>)
-								</li>
-							{/each}
-						</ul>
-					</div>
-				{/if}
-
-				{#if store.trimSuggestions.length > 0}
-					<div class="mt-3">
-						<p class="text-[11px] font-semibold text-shop-text uppercase tracking-wide">
-							Trim a piece
-						</p>
-						<ul class="mt-1 space-y-1 text-xs text-shop-text">
-							{#each store.trimSuggestions as s}
-								<li>
-									Trim <span class="font-medium">"{s.pieceLabel || 'Unnamed'}"</span>
-									{s.dimension === 'height' ? 'length' : 'width'} from
-									<span class="font-mono">{s.originalValue}″</span> →
-									<span class="font-mono">{s.trimmedValue}″</span> →
-									<span class="font-mono text-success">−{s.sheetsSaved} sheet{s.sheetsSaved === 1 ? '' : 's'}</span>
-								</li>
-							{/each}
-						</ul>
-					</div>
-				{/if}
-
-				{#if store.smallStockSuggestions.length > 0}
-					<div class="mt-3">
-						<p class="text-[11px] font-semibold text-shop-text uppercase tracking-wide">
-							Use a smaller stock
-						</p>
-						<ul class="mt-1 space-y-1 text-xs text-shop-text">
-							{#each store.smallStockSuggestions as s}
-								<li>
-									Sheet {s.sheetIndex + 1}
-									(<span class="font-mono">{s.wastePercent.toFixed(0)}%</span> waste,
-									{s.pieceCount} piece{s.pieceCount === 1 ? '' : 's'})
-									fits in
-									<span class="font-mono">{s.minWidth}″ × {s.minHeight}″</span>
-									of stock instead of
-									<span class="font-mono">{s.stockWidth}″ × {s.stockHeight}″</span>
-								</li>
-							{/each}
-						</ul>
-					</div>
-				{/if}
-
-				{#if store.pairingHints.length > 0}
-					<div class="mt-3">
-						<p class="text-[11px] font-semibold text-shop-text uppercase tracking-wide">
-							Near-miss pairings
-						</p>
-						<ul class="mt-1 space-y-2 text-xs text-shop-text">
-							{#each store.pairingHints as hint}
-								{@const pairLabel = hint.selfPair
-									? `2× "${hint.pieceA.label || 'Unnamed'}"`
-									: `"${hint.pieceA.label || 'Unnamed'}" + "${hint.pieceB.label || 'Unnamed'}"`}
-								{@const stackName = hint.axis === 'column' ? 'column' : 'row'}
-								{@const trimResolutions = hint.resolutions.filter((r) => r.kind === 'trim')}
-								{@const hasTolerance = hint.resolutions.some(
-									(r) => r.kind === 'enable-tolerance'
-								)}
-								<li>
-									<div>
-										{pairLabel} in a {hint.sharedDim}″ {stackName} sums to
-										<span class="font-mono">{(hint.pairedLength + hint.kerf).toFixed(3)}″</span>,
-										off the {hint.sheetDim}″ sheet by
-										<span class="font-mono text-kerf">{hint.overshoot.toFixed(3)}″</span>.
-									</div>
-									<div class="mt-1 text-shop-muted">
-										<span class="text-success font-medium">Fix:</span>
-										{#each trimResolutions as r, i}
-											{#if i > 0}<span> or </span>{/if}
-											trim
-											<span class="font-medium text-shop-text">"{r.pieceLabel || 'Unnamed'}"</span>
-											{r.dimension === 'height' ? 'length' : 'width'} from
-											<span class="font-mono">{r.from}″</span> →
-											<span class="font-mono">{r.to.toFixed(3)}″</span>
-										{/each}
-										{#if hasTolerance}
-											, or enable
-											<span class="font-medium text-shop-text">"Allow tight pairings"</span>
-										{/if}.
-									</div>
-								</li>
-							{/each}
-						</ul>
-					</div>
-				{/if}
-			</details>
-		{/if}
+		<SuggestionsPanel />
 
 		<!-- Sheet layouts -->
 		<div class="space-y-6">
