@@ -77,7 +77,7 @@
 {:else}
 	<div class="space-y-5">
 		<!-- Summary bar -->
-		<div class="flex items-center justify-between rounded-lg bg-shop-mid border border-shop-light/60 px-4 py-3 max-w-2xl">
+		<div class="blueprint-card flex items-center justify-between bg-shop-mid px-4 py-3 max-w-2xl">
 			<div class="flex items-center gap-4">
 				<div>
 					<div class="text-2xl font-bold text-white font-mono">{store.result.totalSheets}</div>

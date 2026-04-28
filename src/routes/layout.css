@@ -77,6 +77,34 @@ input[type="checkbox"]:focus-visible {
 	outline-offset: 2px;
 }
 
+/* Blueprint card — hairline border with corner ticks at TL and BR */
+.blueprint-card {
+	position: relative;
+	border: 1px solid var(--color-blueprint-cyan-dim);
+	border-radius: 2px;
+}
+.blueprint-card::before,
+.blueprint-card::after {
+	content: '';
+	position: absolute;
+	width: 6px;
+	height: 6px;
+	border-color: var(--color-blueprint-cyan);
+	pointer-events: none;
+}
+.blueprint-card::before {
+	top: -1px;
+	left: -1px;
+	border-top: 1px solid;
+	border-left: 1px solid;
+}
+.blueprint-card::after {
+	bottom: -1px;
+	right: -1px;
+	border-bottom: 1px solid;
+	border-right: 1px solid;
+}
+
 /* Blueprint title-block treatment for the wordmark */
 .blueprint-title-block {
 	position: relative;
