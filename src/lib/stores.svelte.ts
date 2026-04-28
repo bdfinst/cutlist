@@ -2,6 +2,16 @@ import { browser } from '$app/environment';
 import { getColor } from './colors';
 import { calculateCutlist } from './algorithm';
 import { calculateLumberCutlist, fitsLumberCrossSection } from './lumber-algorithm';
+import {
+	findPairingHints,
+	findSmallStockSuggestions,
+	findConfigSuggestions,
+	findTrimSuggestions,
+	type PairingHint,
+	type SmallStockSuggestion,
+	type ConfigSuggestion,
+	type TrimSuggestion
+} from './suggestions';
 import type {
 	PieceDefinition,
 	SheetConfig,
@@ -19,7 +29,8 @@ export const DEFAULT_CONFIG: SheetConfig = {
 	width: 48,
 	height: 96,
 	kerf: 0.125,
-	grainDirection: false
+	grainDirection: false,
+	oversizeTolerance: 0
 };
 
 class CutlistStore {
@@ -30,6 +41,16 @@ class CutlistStore {
 	#nextColorIndex = 0;
 
 	readonly result: CutlistResult = $derived(calculateCutlist(this.pieces, this.config));
+	readonly pairingHints: PairingHint[] = $derived(findPairingHints(this.pieces, this.config));
+	readonly smallStockSuggestions: SmallStockSuggestion[] = $derived(
+		findSmallStockSuggestions(this.result, this.config)
+	);
+	readonly configSuggestions: ConfigSuggestion[] = $derived(
+		findConfigSuggestions(this.pieces, this.config)
+	);
+	readonly trimSuggestions: TrimSuggestion[] = $derived(
+		findTrimSuggestions(this.pieces, this.config)
+	);
 	readonly lumberResult: LumberResult = $derived(
 		calculateLumberCutlist(this.lumberPieces, this.lumberTypes, this.config.kerf)
 	);

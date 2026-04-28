@@ -29,6 +29,13 @@ export interface SheetConfig {
 	height: number;
 	kerf: number;
 	grainDirection: boolean;
+	/**
+	 * Allow cuts to overflow rect dimensions by up to this many inches. The user
+	 * accepts that the resulting piece may be undersized by this amount —
+	 * physically realized when two adjacent cuts share material that would
+	 * otherwise require an extra kerf of slack.
+	 */
+	oversizeTolerance?: number;
 }
 
 export interface CutlistResult {

@@ -32,6 +32,8 @@ interface Placement {
 }
 
 type SortStrategy = (a: ExpandedPiece, b: ExpandedPiece) => number;
+type ScoreFn = (rectW: number, rectH: number, pieceW: number, pieceH: number) => number;
+type SplitFn = (rectW: number, rectH: number, rightW: number, bottomH: number) => boolean;
 
 const SORT_STRATEGIES: SortStrategy[] = [
 	// Area descending
@@ -42,6 +44,27 @@ const SORT_STRATEGIES: SortStrategy[] = [
 	(a, b) => Math.min(b.width, b.height) - Math.min(a.width, a.height),
 	// Perimeter descending
 	(a, b) => (b.width + b.height) - (a.width + a.height)
+];
+
+// Lower score = better placement.
+const SCORE_FNS: ScoreFn[] = [
+	// Best Area Fit — minimize leftover area
+	(rw, rh, pw, ph) => rw * rh - pw * ph,
+	// Best Short Side Fit — minimize the smaller leftover dimension
+	(rw, rh, pw, ph) => Math.min(rw - pw, rh - ph),
+	// Best Long Side Fit — minimize the larger leftover dimension
+	(rw, rh, pw, ph) => Math.max(rw - pw, rh - ph)
+];
+
+// Returns true when the right rect should take the parent's full height
+// (preserving a tall vertical strip); false to give the bottom rect the full width.
+const SPLIT_FNS: SplitFn[] = [
+	// Heuristic: keep the larger of the two leftover regions intact
+	(rectW, rectH, rightW, bottomH) => rightW * rectH >= rectW * bottomH,
+	// Always preserve a tall right strip — good for narrow long pieces (cleats)
+	() => true,
+	// Always preserve a wide bottom strip — good for wide short pieces
+	() => false
 ];
 
 const EPSILON = 0.0001;
@@ -62,12 +85,15 @@ export function calculateCutlist(pieces: PieceDefinition[], config: SheetConfig)
 
 	let bestResult: CutlistResult | null = null;
 
-	for (const strategy of SORT_STRATEGIES) {
-		const sorted = expanded.toSorted(strategy);
-		const result = runPacking(sorted, pieces, config);
-
-		if (!bestResult || isBetterResult(result, bestResult)) {
-			bestResult = result;
+	for (const sortStrategy of SORT_STRATEGIES) {
+		const sorted = expanded.toSorted(sortStrategy);
+		for (const scoreFn of SCORE_FNS) {
+			for (const splitFn of SPLIT_FNS) {
+				const result = runPacking(sorted, pieces, config, scoreFn, splitFn);
+				if (!bestResult || isBetterResult(result, bestResult)) {
+					bestResult = result;
+				}
+			}
 		}
 	}
 
@@ -90,26 +116,27 @@ function isBetterResult(a: CutlistResult, b: CutlistResult): boolean {
 function runPacking(
 	expanded: ExpandedPiece[],
 	originalPieces: PieceDefinition[],
-	config: SheetConfig
+	config: SheetConfig,
+	scoreFn: ScoreFn,
+	splitFn: SplitFn
 ): CutlistResult {
 	const sheets: Sheet[] = [];
 	const unfitPieces: PieceDefinition[] = [];
 
 	for (const piece of expanded) {
-		const placement = findBestPlacement(piece, sheets, config);
+		const placement = findBestPlacement(piece, sheets, config, scoreFn);
 
 		if (placement) {
-			placePiece(piece, placement, sheets, config);
+			placePiece(piece, placement, sheets, config, splitFn);
 		} else {
-			const newSheetIndex = sheets.length;
 			sheets.push({
 				freeRects: [{ x: 0, y: 0, width: config.width, height: config.height }],
 				placed: []
 			});
 
-			const newPlacement = findBestPlacement(piece, sheets, config);
+			const newPlacement = findBestPlacement(piece, sheets, config, scoreFn);
 			if (newPlacement) {
-				placePiece(piece, newPlacement, sheets, config);
+				placePiece(piece, newPlacement, sheets, config, splitFn);
 			} else {
 				sheets.pop();
 				if (!unfitPieces.find((p) => p.id === piece.id)) {
@@ -164,7 +191,8 @@ function fitsInRect(
 	pieceW: number,
 	pieceH: number,
 	rect: FreeRect,
-	kerf: number
+	kerf: number,
+	tolerance: number
 ): boolean {
 	// Kerf is needed on right/bottom only when the piece doesn't fill the rect
 	// (a cut is required to separate the piece from remaining material)
@@ -172,15 +200,17 @@ function fitsInRect(
 	const needKerfBottom = pieceH < rect.height - EPSILON;
 	const totalW = pieceW + (needKerfRight ? kerf : 0);
 	const totalH = pieceH + (needKerfBottom ? kerf : 0);
-	return totalW <= rect.width + EPSILON && totalH <= rect.height + EPSILON;
+	return totalW <= rect.width + tolerance + EPSILON && totalH <= rect.height + tolerance + EPSILON;
 }
 
 function findBestPlacement(
 	piece: { width: number; height: number },
 	sheets: Sheet[],
-	config: SheetConfig
+	config: SheetConfig,
+	scoreFn: ScoreFn
 ): Placement | null {
 	let best: Placement | null = null;
+	const tolerance = config.oversizeTolerance ?? 0;
 
 	for (let si = 0; si < sheets.length; si++) {
 		const rects = sheets[si].freeRects;
@@ -188,8 +218,8 @@ function findBestPlacement(
 			const rect = rects[ri];
 
 			// Try normal orientation
-			if (fitsInRect(piece.width, piece.height, rect, config.kerf)) {
-				const score = rect.width * rect.height - piece.width * piece.height;
+			if (fitsInRect(piece.width, piece.height, rect, config.kerf, tolerance)) {
+				const score = scoreFn(rect.width, rect.height, piece.width, piece.height);
 				if (!best || score < best.score) {
 					best = {
 						sheetIndex: si,
@@ -206,8 +236,8 @@ function findBestPlacement(
 
 			// Try rotated orientation (only if grain direction doesn't matter)
 			if (!config.grainDirection && piece.width !== piece.height) {
-				if (fitsInRect(piece.height, piece.width, rect, config.kerf)) {
-					const score = rect.width * rect.height - piece.height * piece.width;
+				if (fitsInRect(piece.height, piece.width, rect, config.kerf, tolerance)) {
+					const score = scoreFn(rect.width, rect.height, piece.height, piece.width);
 					if (!best || score < best.score) {
 						best = {
 							sheetIndex: si,
@@ -232,7 +262,8 @@ function placePiece(
 	piece: { id: string; label: string; color: string },
 	placement: Placement,
 	sheets: Sheet[],
-	config: SheetConfig
+	config: SheetConfig,
+	splitFn: SplitFn
 ): void {
 	const sheet = sheets[placement.sheetIndex];
 	const rect = sheet.freeRects[placement.rectIndex];
@@ -258,11 +289,11 @@ function placePiece(
 	const consumedW = placement.width + (needKerfRight ? kerf : 0);
 	const consumedH = placement.height + (needKerfBottom ? kerf : 0);
 
-	const rightW = rect.width - consumedW;
-	const bottomH = rect.height - consumedH;
+	// Clamp to non-negative — under tolerance, consumed* may exceed rect bounds
+	const rightW = Math.max(0, rect.width - consumedW);
+	const bottomH = Math.max(0, rect.height - consumedH);
 
-	// Choose split direction: prefer the split that produces more usable area
-	const splitHoriz = rightW * rect.height >= rect.width * bottomH;
+	const splitHoriz = splitFn(rect.width, rect.height, rightW, bottomH);
 
 	if (splitHoriz) {
 		// Right rect: full height of parent

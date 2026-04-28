@@ -88,4 +88,23 @@
 			<span class="text-xs text-shop-muted leading-tight">Lock grain<br/><span class="text-shop-text text-[10px]">(no rotation)</span></span>
 		</label>
 	</div>
+
+	<label class="flex items-start gap-2 cursor-pointer pt-1">
+		<input
+			type="checkbox"
+			class="mt-0.5"
+			checked={(store.config.oversizeTolerance ?? 0) > 0}
+			onchange={(e) =>
+				store.updateConfig({
+					oversizeTolerance: e.currentTarget.checked ? store.config.kerf : 0
+				})}
+		/>
+		<span class="text-xs text-shop-muted leading-tight">
+			Allow tight pairings
+			<br />
+			<span class="text-shop-text text-[10px]">
+				accept cuts up to one kerf undersized to fit pieces that just barely overflow
+			</span>
+		</span>
+	</label>
 </div>
