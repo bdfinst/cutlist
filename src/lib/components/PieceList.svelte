@@ -43,6 +43,8 @@
 				if (result.warnings.length > 0) {
 					statusMessage += ` ${result.warnings.length} row${result.warnings.length === 1 ? '' : 's'} skipped.`;
 				}
+
+				store.recordImport(file.name, count, result.warnings.length);
 			};
 			reader.readAsText(file);
 		});

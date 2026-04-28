@@ -56,6 +56,8 @@
 				if (importWarnings.length > 0) {
 					statusMessage += ` ${importWarnings.length} warning${importWarnings.length === 1 ? '' : 's'}.`;
 				}
+
+				store.recordImport(file.name, count, importWarnings.length);
 			};
 			reader.readAsText(file);
 		});
