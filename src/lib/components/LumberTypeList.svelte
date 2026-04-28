@@ -34,10 +34,13 @@
 	</div>
 
 	{#if store.lumberTypes.length === 0}
-		<div class="rounded-lg border border-dashed border-shop-light/60 py-8 text-center">
-			<p class="text-sm text-shop-muted">No lumber types defined</p>
-			<p class="text-xs text-shop-muted/60 mt-1">Add a lumber type to get started</p>
-		</div>
+		<p class="text-xs text-shop-muted/70">
+			No lumber types defined. <button
+				type="button"
+				onclick={handleAddType}
+				class="text-plywood hover:text-plywood-light underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plywood"
+			>Add type</button> if you're packing dimensional lumber too.
+		</p>
 	{/if}
 
 	<ul class="space-y-2" role="list">

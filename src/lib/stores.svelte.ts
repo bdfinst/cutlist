@@ -39,13 +39,24 @@ export const DEFAULT_CONFIG: SheetConfig = {
 	oversizeTolerance: 0
 };
 
+export interface ImportNotice {
+	filename: string;
+	count: number;
+	skipped: number;
+	timestamp: number;
+}
+
+const IMPORT_NOTICE_TTL_MS = 5_000;
+
 class CutlistStore {
 	pieces = $state<PieceDefinition[]>([]);
 	config = $state<SheetConfig>({ ...DEFAULT_CONFIG });
 	lumberTypes = $state<LumberType[]>([]);
 	lumberPieces = $state<LumberPiece[]>([]);
+	lastImportNotice = $state<ImportNotice | null>(null);
 	#nextColorIndex = 0;
 	#storage: StorageLike | null = null;
+	#noticeTimer: ReturnType<typeof setTimeout> | null = null;
 
 	constructor() {
 		if (!browser) return;
@@ -127,6 +138,32 @@ class CutlistStore {
 
 	updateConfig(updates: Partial<SheetConfig>): void {
 		this.config = { ...this.config, ...updates };
+	}
+
+	// --- Import notice ---
+
+	recordImport(filename: string, count: number, skipped: number): void {
+		if (this.#noticeTimer !== null) {
+			clearTimeout(this.#noticeTimer);
+			this.#noticeTimer = null;
+		}
+		this.lastImportNotice = { filename, count, skipped, timestamp: Date.now() };
+		if (browser) {
+			this.#noticeTimer = setTimeout(() => {
+				this.lastImportNotice = null;
+				this.#noticeTimer = null;
+			}, IMPORT_NOTICE_TTL_MS);
+		}
+	}
+
+	// --- Suggestion-driven mutations ---
+
+	applyTrim(pieceId: string, dimension: 'width' | 'height', newValue: number): void {
+		this.updatePiece(pieceId, { [dimension]: newValue });
+	}
+
+	applyConfig(updates: Partial<SheetConfig>): void {
+		this.updateConfig(updates);
 	}
 
 	// --- Lumber types ---

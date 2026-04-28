@@ -43,6 +43,8 @@
 				if (result.warnings.length > 0) {
 					statusMessage += ` ${result.warnings.length} row${result.warnings.length === 1 ? '' : 's'} skipped.`;
 				}
+
+				store.recordImport(file.name, count, result.warnings.length);
 			};
 			reader.readAsText(file);
 		});
@@ -138,9 +140,16 @@
 	{/if}
 
 	{#if store.pieces.length === 0}
-		<div class="rounded-lg border border-dashed border-shop-light/60 py-8 text-center">
-			<p class="text-sm text-shop-muted">No pieces yet</p>
-			<p class="text-xs text-shop-muted/60 mt-1">Add pieces manually or import from CSV</p>
+		<div class="rounded-lg border border-shop-light bg-shop-mid/40 px-4 py-6 text-center">
+			<p class="text-sm text-shop-text">Add a part list to plan your cuts.</p>
+			<p class="mt-1 text-xs text-shop-muted">
+				Type pieces in directly, paste a CSV, or load the example to see the layout.
+			</p>
+			<div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+				<button type="button" onclick={handleAdd} class={btnPrimary}>+ Add piece</button>
+				<button type="button" onclick={handleImportClick} class={btnGhost}>Import CSV</button>
+				<button type="button" onclick={handleDownloadExample} class={btnGhost}>Example CSV</button>
+			</div>
 		</div>
 	{/if}
 

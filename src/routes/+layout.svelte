@@ -1,5 +1,6 @@
 <script lang="ts">
 	import './layout.css';
+	import Toast from '$lib/components/Toast.svelte';
 
 	let { children } = $props();
 </script>
@@ -15,3 +16,4 @@
 	<link rel="manifest" href="/manifest.webmanifest" />
 </svelte:head>
 {@render children()}
+<Toast />
