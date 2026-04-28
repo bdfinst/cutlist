@@ -35,11 +35,12 @@ export function generatePDF(
 	lumberTypes: LumberType[],
 	config: SheetConfig,
 	pieces: PieceDefinition[],
-	lumberPieces: LumberPiece[]
+	lumberPieces: LumberPiece[],
+	sheetImages: string[] = []
 ): void {
 	const doc = new jsPDF({ orientation: 'landscape', unit: 'in', format: 'letter' });
 
-	renderSheetPages(doc, result, config);
+	renderSheetPages(doc, result, config, sheetImages);
 	renderLumberPages(doc, lumberResult, lumberTypes);
 	renderSummaryPage(doc, pieces, lumberPieces, lumberTypes, result, lumberResult);
 
@@ -48,7 +49,12 @@ export function generatePDF(
 
 // --- Sheet pages: two sheets per landscape page, side by side ---
 
-function renderSheetPages(doc: jsPDF, result: CutlistResult, config: SheetConfig): void {
+function renderSheetPages(
+	doc: jsPDF,
+	result: CutlistResult,
+	config: SheetConfig,
+	sheetImages: string[]
+): void {
 	if (result.sheets.length === 0) return;
 
 	const drawW = PAGE_W - 2 * MARGIN;
@@ -56,12 +62,31 @@ function renderSheetPages(doc: jsPDF, result: CutlistResult, config: SheetConfig
 	const slotW = (drawW - SHEET_GAP) / 2;
 	const slotH = drawH;
 	const scale = Math.min(slotW / config.width, slotH / config.height);
+	// Only use captured PNGs if every sheet has one — otherwise fall back to
+	// drawing each sheet's pieces with jsPDF primitives.
+	const useImages = sheetImages.length === result.sheets.length;
 
 	for (let i = 0; i < result.sheets.length; i += 2) {
 		if (i > 0) doc.addPage();
-		renderSheetAt(doc, result.sheets[i], config, MARGIN, MARGIN, scale);
+		renderSheetAt(
+			doc,
+			result.sheets[i],
+			config,
+			MARGIN,
+			MARGIN,
+			scale,
+			useImages ? sheetImages[i] : undefined
+		);
 		if (i + 1 < result.sheets.length) {
-			renderSheetAt(doc, result.sheets[i + 1], config, MARGIN + slotW + SHEET_GAP, MARGIN, scale);
+			renderSheetAt(
+				doc,
+				result.sheets[i + 1],
+				config,
+				MARGIN + slotW + SHEET_GAP,
+				MARGIN,
+				scale,
+				useImages ? sheetImages[i + 1] : undefined
+			);
 		}
 	}
 }
@@ -72,7 +97,8 @@ function renderSheetAt(
 	config: SheetConfig,
 	originX: number,
 	originY: number,
-	scale: number
+	scale: number,
+	sheetImage?: string
 ): void {
 	// Header above the sheet
 	doc.setFont('helvetica', 'normal');
@@ -86,11 +112,19 @@ function renderSheetAt(
 
 	const sheetX = originX;
 	const sheetY = originY + HEADER_H;
+	const sheetWidthIn = config.width * scale;
+	const sheetHeightIn = config.height * scale;
 
-	// Sheet outline at full configured dimensions
+	if (sheetImage) {
+		// Embed the on-screen rendered SVG (already has correctly-rotated labels).
+		doc.addImage(sheetImage, 'JPEG', sheetX, sheetY, sheetWidthIn, sheetHeightIn);
+		return;
+	}
+
+	// Fallback: draw with jsPDF primitives.
 	doc.setDrawColor(150);
 	doc.setLineWidth(0.01);
-	doc.rect(sheetX, sheetY, config.width * scale, config.height * scale);
+	doc.rect(sheetX, sheetY, sheetWidthIn, sheetHeightIn);
 
 	for (const piece of sheet.pieces) {
 		const px = sheetX + piece.x * scale;
