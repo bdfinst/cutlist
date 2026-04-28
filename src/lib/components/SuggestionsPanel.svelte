@@ -22,7 +22,7 @@
 
 {#if hasAny}
 	<div
-		class="rounded-lg border border-plywood/40 bg-plywood/5 p-3 max-w-2xl"
+		class="blueprint-card bg-plywood/5 p-3 max-w-2xl"
 		aria-label="Ways to reduce waste"
 	>
 		<p class="text-xs font-semibold text-plywood">Ways to reduce waste</p>

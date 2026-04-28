@@ -1,14 +1,11 @@
 <script lang="ts">
 	import type { SheetLayout, SheetConfig } from '$lib/types';
 	import SheetSVG from './SheetSVG.svelte';
+	import { wasteClass } from '$lib/waste-color';
 
 	let { sheet, config }: { sheet: SheetLayout; config: SheetConfig } = $props();
 
-	let wasteColor = $derived(
-		sheet.wastePercent > 50 ? 'text-kerf' :
-		sheet.wastePercent > 30 ? 'text-plywood' :
-		'text-success'
-	);
+	let wasteColor = $derived(wasteClass(sheet.wastePercent));
 </script>
 
 <div class="space-y-2 max-w-md scroll-mt-20" data-sheet-index={sheet.sheetIndex}>

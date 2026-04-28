@@ -1,4 +1,8 @@
 <script lang="ts">
+	import '@fontsource/ibm-plex-sans/400.css';
+	import '@fontsource/ibm-plex-sans/600.css';
+	import '@fontsource/ibm-plex-mono/400.css';
+	import '@fontsource/ibm-plex-mono/600.css';
 	import './layout.css';
 	import Toast from '$lib/components/Toast.svelte';
 

@@ -140,7 +140,7 @@
 	{/if}
 
 	{#if store.pieces.length === 0}
-		<div class="rounded-lg border border-shop-light bg-shop-mid/40 px-4 py-6 text-center">
+		<div class="blueprint-card bg-shop-mid/40 px-4 py-6 text-center">
 			<p class="text-sm text-shop-text">Add a part list to plan your cuts.</p>
 			<p class="mt-1 text-xs text-shop-muted">
 				Type pieces in directly, paste a CSV, or load the example to see the layout.

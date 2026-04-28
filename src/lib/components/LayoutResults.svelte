@@ -5,6 +5,8 @@
 	import LayoutPreview from './LayoutPreview.svelte';
 	import StickyDownloadButton from './StickyDownloadButton.svelte';
 	import SuggestionsPanel from './SuggestionsPanel.svelte';
+	import BlueprintSheetIllustration from './BlueprintSheetIllustration.svelte';
+	import { wasteClass, WASTE_THRESHOLD_LOW, WASTE_THRESHOLD_HIGH } from '$lib/waste-color';
 
 	const PDF_SHEET_RASTER_WIDTH = 900;
 
@@ -16,11 +18,7 @@
 			: ''
 	);
 
-	let wasteColor = $derived(
-		store.result.totalWastePercent > 50 ? 'text-kerf' :
-		store.result.totalWastePercent > 30 ? 'text-plywood' :
-		'text-success'
-	);
+	let wasteColor = $derived(wasteClass(store.result.totalWastePercent));
 
 	async function captureSheetImages(): Promise<string[]> {
 		const containers = document.querySelectorAll<HTMLElement>('[data-sheet-index]');
@@ -58,14 +56,17 @@
 </script>
 
 {#if store.pieces.length === 0}
-	<div class="flex items-center justify-center rounded-lg border border-dashed border-shop-light/40 py-20">
+	<div class="blueprint-card flex items-center justify-center bg-shop-mid/30 px-6 py-12">
 		<div class="text-center">
-			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" class="mx-auto text-shop-light mb-3">
-				<rect x="2" y="2" width="20" height="20" rx="2" stroke="currentColor" stroke-width="1"/>
-				<line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 2"/>
-				<line x1="12" y1="2" x2="12" y2="22" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 2"/>
-			</svg>
-			<p class="text-sm text-shop-muted">Add pieces to see the layout</p>
+			<div class="mx-auto mb-4 max-w-[260px]">
+				<BlueprintSheetIllustration
+					widthLabel={`${Math.max(store.config.width, store.config.height)}"`}
+					heightLabel={`${Math.min(store.config.width, store.config.height)}"`}
+				/>
+			</div>
+			<p class="font-mono text-xs uppercase tracking-widest text-shop-muted">
+				Add pieces to see the layout
+			</p>
 		</div>
 	</div>
 {:else if store.result.totalSheets === 0 && store.result.unfitPieces.length === 0}
@@ -73,16 +74,27 @@
 {:else}
 	<div class="space-y-5">
 		<!-- Summary bar -->
-		<div class="flex items-center justify-between rounded-lg bg-shop-mid border border-shop-light/60 px-4 py-3 max-w-2xl">
+		<div class="blueprint-card flex items-center justify-between bg-shop-mid px-4 py-3 max-w-2xl">
 			<div class="flex items-center gap-4">
 				<div>
-					<div class="text-2xl font-bold text-white font-mono">{store.result.totalSheets}</div>
+					<div class="font-mono text-2xl font-bold text-white">{store.result.totalSheets}</div>
 					<div class="text-xs text-shop-muted">sheet{store.result.totalSheets === 1 ? '' : 's'}</div>
 				</div>
 				<div class="h-8 w-px bg-shop-light"></div>
 				<div>
-					<div class="text-2xl font-bold font-mono {wasteColor}">{store.result.totalWastePercent.toFixed(1)}%</div>
-					<div class="text-xs text-shop-muted">waste</div>
+					<div class="font-mono text-2xl font-bold {wasteColor}">{store.result.totalWastePercent.toFixed(1)}%</div>
+					<div class="flex items-center gap-1.5 text-xs text-shop-muted">
+						<span>waste</span>
+						<span
+							class="ml-1 inline-flex items-center gap-0.5 font-mono text-[10px] text-shop-muted/80"
+							title="Waste thresholds: green &lt; {WASTE_THRESHOLD_LOW}%, amber {WASTE_THRESHOLD_LOW}-{WASTE_THRESHOLD_HIGH}%, red &gt; {WASTE_THRESHOLD_HIGH}%"
+							aria-label="Waste thresholds: green under {WASTE_THRESHOLD_LOW}%, amber {WASTE_THRESHOLD_LOW} to {WASTE_THRESHOLD_HIGH}%, red over {WASTE_THRESHOLD_HIGH}%"
+						>
+							<span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>
+							<span class="h-1.5 w-1.5 rounded-full bg-warn" aria-hidden="true"></span>
+							<span class="h-1.5 w-1.5 rounded-full bg-danger" aria-hidden="true"></span>
+						</span>
+					</div>
 				</div>
 			</div>
 			<button
@@ -118,8 +130,10 @@
 
 		<!-- Sheet layouts -->
 		<div class="space-y-6">
-			{#each store.result.sheets as sheet (sheet.sheetIndex)}
-				<LayoutPreview {sheet} config={store.config} />
+			{#each store.result.sheets as sheet, i (sheet.sheetIndex)}
+				<div class="sheet-reveal" style:animation-delay={`${i * 80}ms`}>
+					<LayoutPreview {sheet} config={store.config} />
+				</div>
 			{/each}
 		</div>
 	</div>
