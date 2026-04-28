@@ -23,9 +23,9 @@
 </script>
 
 <li class="group rounded-lg border border-shop-light/60 bg-shop-mid p-2.5 transition-colors hover:border-shop-muted/50">
-	<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+	<div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
 		<!-- Label row -->
-		<div class="flex min-w-0 flex-1 items-center gap-2">
+		<div class="flex min-w-0 flex-1 items-center gap-2 sm:min-w-[18ch]">
 			<div
 				class="h-3 w-3 shrink-0 rounded-sm ring-1 ring-white/10"
 				style:background-color={piece.color}
