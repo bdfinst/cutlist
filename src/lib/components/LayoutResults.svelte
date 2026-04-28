@@ -130,8 +130,10 @@
 
 		<!-- Sheet layouts -->
 		<div class="space-y-6">
-			{#each store.result.sheets as sheet (sheet.sheetIndex)}
-				<LayoutPreview {sheet} config={store.config} />
+			{#each store.result.sheets as sheet, i (sheet.sheetIndex)}
+				<div class="sheet-reveal" style:animation-delay={`${i * 80}ms`}>
+					<LayoutPreview {sheet} config={store.config} />
+				</div>
 			{/each}
 		</div>
 	</div>
