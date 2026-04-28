@@ -11,7 +11,7 @@
 	);
 </script>
 
-<div class="space-y-2">
+<div class="space-y-2 max-w-md">
 	<div class="flex items-baseline justify-between">
 		<h3 class="text-sm font-semibold text-white">
 			Sheet {sheet.sheetIndex + 1}
