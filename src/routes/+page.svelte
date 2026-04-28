@@ -74,7 +74,7 @@
 	<header class="border-b border-shop-light bg-shop-mid/50 backdrop-blur-sm sticky top-0 z-10">
 		<div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 flex items-center justify-between">
 			<div class="flex items-center gap-3">
-				<div class="flex items-center gap-2">
+				<div class="blueprint-title-block flex items-center gap-2">
 					<img
 						src="/favicon.svg"
 						width="28"
@@ -82,9 +82,11 @@
 						alt=""
 						class="block"
 					/>
-					<h1 class="text-lg font-semibold tracking-tight text-white">Cutlist</h1>
+					<h1 class="font-mono text-lg font-semibold uppercase tracking-[0.18em] text-white">
+						<span aria-label="Cutlist">CUTLIST</span>
+					</h1>
 				</div>
-				<span class="text-xs text-shop-muted font-mono hidden sm:block">cut optimizer</span>
+				<span class="hidden font-mono text-[10px] uppercase tracking-widest text-shop-muted sm:block">cut optimizer</span>
 			</div>
 
 		</div>

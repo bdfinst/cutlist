@@ -77,6 +77,32 @@ input[type="checkbox"]:focus-visible {
 	outline-offset: 2px;
 }
 
+/* Blueprint title-block treatment for the wordmark */
+.blueprint-title-block {
+	position: relative;
+	padding: 6px 10px;
+}
+.blueprint-title-block::before,
+.blueprint-title-block::after {
+	content: '';
+	position: absolute;
+	width: 8px;
+	height: 8px;
+	border-color: var(--color-blueprint-cyan);
+}
+.blueprint-title-block::before {
+	top: 0;
+	left: 0;
+	border-top: 1px solid;
+	border-left: 1px solid;
+}
+.blueprint-title-block::after {
+	bottom: 0;
+	right: 0;
+	border-bottom: 1px solid;
+	border-right: 1px solid;
+}
+
 /* Button press feedback */
 .btn-press:active:not(:disabled) {
 	transform: scale(0.96);
