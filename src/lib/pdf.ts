@@ -118,34 +118,65 @@ function renderPiece(
 	const [tr, tg, tb] = hexToRgb(getContrastColor(piece.color));
 	doc.setTextColor(tr, tg, tb);
 
-	// Decide whether to rotate the label along the long axis.
-	const rotate = h > w * ROTATE_ASPECT_THRESHOLD;
-	const shortDim = Math.min(w, h);
-	const labelSize = clamp(shortDim * LABEL_FONT_SCALE, LABEL_FONT_MIN, LABEL_FONT_MAX);
-
 	const label = piece.label + (piece.rotated ? ' ↻' : '');
 	const dim = `${piece.width} × ${piece.height}`;
-	const dimSize = labelSize * 0.7;
-
 	const cx = x + w / 2;
 	const cy = y + h / 2;
-	// Stack label above dimension along the reading axis. In PDF inches:
+
+	// Size the label so it fits within whichever dimension is the reading axis.
+	// Tall pieces read along the long (height) axis after rotating the CTM;
+	// wide pieces read horizontally.
+	const rotate = h > w * ROTATE_ASPECT_THRESHOLD;
+	const lengthBudget = rotate ? h : w;
+	const perpBudget = rotate ? w : h;
+	const labelSize = sizeLabelToFit(doc, label, lengthBudget, perpBudget);
+	const dimSize = labelSize * 0.7;
 	const lineGap = labelSize / POINTS_PER_INCH * 0.55;
 
 	if (rotate) {
-		// Rotated 90° CCW: text reads bottom-to-top. Both texts stay horizontally
-		// centered on the piece (x = cx); stack along the long axis with the label
-		// at the reading-start (bottom) and the dimension above it.
+		// Rotate the page CTM 90° CCW around the piece center, then render the
+		// text horizontally at (cx, cy). jsPDF's CTM rotation correctly places
+		// the text — its built-in `angle:` option positions text inconsistently
+		// when combined with align/baseline, so we avoid it.
+		const pageH = doc.internal.pageSize.getHeight();
+		const py_pdf = pageH - cy;
+		// Rotation 90 CCW around (cx, py_pdf) in PDF y-up coords:
+		// [a, b, c, d, e, f] = [0, 1, -1, 0, cx + py_pdf, py_pdf - cx]
+		doc.saveGraphicsState();
+		const m = new (doc as unknown as { Matrix: new (...args: number[]) => unknown }).Matrix(
+			0,
+			1,
+			-1,
+			0,
+			cx + py_pdf,
+			py_pdf - cx
+		);
+		(doc as unknown as { advancedAPI: (cb: (api: { setCurrentTransformationMatrix: (m: unknown) => void }) => void) => void }).advancedAPI(
+			(api) => api.setCurrentTransformationMatrix(m)
+		);
 		doc.setFontSize(labelSize);
-		doc.text(label, cx, cy + lineGap, { align: 'center', baseline: 'middle', angle: 90 });
+		doc.text(label, cx, cy - lineGap, { align: 'center', baseline: 'middle' });
 		doc.setFontSize(dimSize);
-		doc.text(dim, cx, cy - lineGap, { align: 'center', baseline: 'middle', angle: 90 });
+		doc.text(dim, cx, cy + lineGap, { align: 'center', baseline: 'middle' });
+		doc.restoreGraphicsState();
 	} else {
 		doc.setFontSize(labelSize);
 		doc.text(label, cx, cy - lineGap, { align: 'center', baseline: 'middle' });
 		doc.setFontSize(dimSize);
 		doc.text(dim, cx, cy + lineGap, { align: 'center', baseline: 'middle' });
 	}
+}
+
+function sizeLabelToFit(doc: jsPDF, label: string, lengthBudget: number, perpBudget: number): number {
+	// Scale by the perpendicular budget (limits font height); also shrink if the
+	// label is too long to fit along the reading axis.
+	const sizeByPerp = perpBudget * LABEL_FONT_SCALE;
+	doc.setFontSize(sizeByPerp);
+	const widthAtSize = doc.getTextWidth(label);
+	// If text overflows length, scale down proportionally (× 0.95 to leave margin)
+	const overflowRatio = widthAtSize / (lengthBudget * 0.95);
+	const sizeByLength = overflowRatio > 1 ? sizeByPerp / overflowRatio : sizeByPerp;
+	return clamp(Math.min(sizeByPerp, sizeByLength), LABEL_FONT_MIN, LABEL_FONT_MAX);
 }
 
 // --- Lumber pages ---
