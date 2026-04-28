@@ -7,6 +7,7 @@
 	import LumberResults from '$lib/components/LumberResults.svelte';
 	import ModeSelector from '$lib/components/ModeSelector.svelte';
 	import KerfInput from '$lib/components/KerfInput.svelte';
+	import DonateButton from '$lib/components/DonateButton.svelte';
 	import { store } from '$lib/stores.svelte';
 </script>
 
@@ -92,6 +93,7 @@
 				<span class="hidden font-mono text-[10px] uppercase tracking-widest text-shop-muted sm:block">cut optimizer</span>
 			</div>
 
+			<DonateButton />
 		</div>
 	</header>
 

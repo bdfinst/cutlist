@@ -24,3 +24,5 @@ vite.config.ts.timestamp-*
 .stryker-tmp/
 coverage/
 reports/
+test-results/
+playwright-report/
