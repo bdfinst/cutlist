@@ -3,6 +3,7 @@
 	import { generatePDF } from '$lib/pdf';
 	import { svgElementToPng } from '$lib/svg-to-image';
 	import LayoutPreview from './LayoutPreview.svelte';
+	import StickyDownloadButton from './StickyDownloadButton.svelte';
 
 	const PDF_SHEET_RASTER_WIDTH = 900;
 
@@ -85,6 +86,7 @@
 			</div>
 			<button
 				type="button"
+				data-download-pdf
 				onclick={handleDownloadPdf}
 				disabled={isGeneratingPdf}
 				class="flex items-center gap-2 rounded-lg bg-plywood px-4 py-2 text-sm font-semibold text-shop-dark hover:bg-plywood-light transition-colors btn-press btn-glow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plywood disabled:opacity-50 disabled:cursor-wait"
@@ -231,6 +233,12 @@
 			{/each}
 		</div>
 	</div>
+
+	<StickyDownloadButton
+		anchorSelector="[data-download-pdf]"
+		onDownload={handleDownloadPdf}
+		busy={isGeneratingPdf}
+	/>
 {/if}
 
 <div class="sr-only" aria-live="polite" aria-atomic="true">{resultSummary}</div>
