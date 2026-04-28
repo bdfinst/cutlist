@@ -133,11 +133,13 @@ function renderPiece(
 	const lineGap = labelSize / POINTS_PER_INCH * 0.55;
 
 	if (rotate) {
-		// Rotated 90° CCW: text reads bottom-to-top, lines stack along x.
+		// Rotated 90° CCW: text reads bottom-to-top. Both texts stay horizontally
+		// centered on the piece (x = cx); stack along the long axis with the label
+		// at the reading-start (bottom) and the dimension above it.
 		doc.setFontSize(labelSize);
-		doc.text(label, cx + lineGap, cy, { align: 'center', baseline: 'middle', angle: 90 });
+		doc.text(label, cx, cy + lineGap, { align: 'center', baseline: 'middle', angle: 90 });
 		doc.setFontSize(dimSize);
-		doc.text(dim, cx - lineGap, cy, { align: 'center', baseline: 'middle', angle: 90 });
+		doc.text(dim, cx, cy - lineGap, { align: 'center', baseline: 'middle', angle: 90 });
 	} else {
 		doc.setFontSize(labelSize);
 		doc.text(label, cx, cy - lineGap, { align: 'center', baseline: 'middle' });
