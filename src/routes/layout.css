@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');
-
 @import 'tailwindcss';
 
 @theme {
@@ -14,13 +12,16 @@
 	--color-shop-muted: #7a7a88;
 	--color-kerf: #ff6b35;
 	--color-success: #4caf50;
+	--color-warn: #d4a017;
 	--color-danger: #ef5350;
 	--color-warn-bg: #3d3520;
 	--color-warn-border: #6b5a2e;
 	--color-warn-text: #e8c87a;
+	--color-blueprint-cyan: #5DA9D6;
+	--color-blueprint-cyan-dim: #355A6F;
 
-	--font-sans: 'DM Sans', system-ui, sans-serif;
-	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
+	--font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+	--font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 body {

@@ -107,7 +107,7 @@
 					font-size={fs}
 					fill={textColor}
 					font-weight="600"
-					font-family="'DM Sans', sans-serif"
+					font-family="'IBM Plex Sans', system-ui, sans-serif"
 				>
 					{piece.label}{piece.rotated ? ' ↻' : ''}
 				</text>
@@ -120,7 +120,7 @@
 						font-size={fs * 0.6}
 						fill={textColor}
 						opacity="0.7"
-						font-family="'JetBrains Mono', monospace"
+						font-family="'IBM Plex Mono', ui-monospace, monospace"
 					>
 						{piece.width}&times;{piece.height}
 					</text>
