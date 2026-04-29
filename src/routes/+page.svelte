@@ -1,14 +1,14 @@
 <script lang="ts">
-	import PieceList from '$lib/components/PieceList.svelte';
-	import SheetConfig from '$lib/components/SheetConfig.svelte';
-	import LayoutResults from '$lib/components/LayoutResults.svelte';
-	import LumberTypeList from '$lib/components/LumberTypeList.svelte';
-	import LumberPieceList from '$lib/components/LumberPieceList.svelte';
-	import LumberResults from '$lib/components/LumberResults.svelte';
-	import ModeSelector from '$lib/components/ModeSelector.svelte';
-	import KerfInput from '$lib/components/KerfInput.svelte';
-	import DonateButton from '$lib/components/DonateButton.svelte';
-	import { store } from '$lib/stores.svelte';
+	import DonateButton from '$lib/components/DonateButton.svelte'
+	import KerfInput from '$lib/components/KerfInput.svelte'
+	import LayoutResults from '$lib/components/LayoutResults.svelte'
+	import LumberPieceList from '$lib/components/LumberPieceList.svelte'
+	import LumberResults from '$lib/components/LumberResults.svelte'
+	import LumberTypeList from '$lib/components/LumberTypeList.svelte'
+	import ModeSelector from '$lib/components/ModeSelector.svelte'
+	import PieceList from '$lib/components/PieceList.svelte'
+	import SheetConfig from '$lib/components/SheetConfig.svelte'
+	import { store } from '$lib/stores.svelte'
 </script>
 
 <svelte:head>
@@ -166,8 +166,7 @@
 				</p>
 				<p>
 					Built for cabinet shops, hobbyist woodworkers, closet builders, and
-					anyone who needs to make the most of a 4&times;8 sheet of plywood
-					without paying for cut list software.
+					anyone who needs to make the most of raw materials
 				</p>
 			</div>
 		</details>
