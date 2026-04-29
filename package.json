@@ -33,6 +33,7 @@
 	"dependencies": {
 		"@fontsource/ibm-plex-mono": "^5.2.7",
 		"@fontsource/ibm-plex-sans": "^5.2.8",
-		"jspdf": "^4.2.1"
+		"jspdf": "^4.2.1",
+		"stripe": "^22.1.0"
 	}
 }

@@ -119,3 +119,59 @@ test/
 - [Tailwind CSS 4](https://tailwindcss.com/) via `@tailwindcss/vite`
 - [jsPDF](https://github.com/parallax/jsPDF) for client-side PDF generation
 - [Vitest](https://vitest.dev/) for unit tests
+
+## Donations (Stripe Checkout)
+
+The header has an optional **Support** button that creates a one-time
+open-amount donation via Stripe Checkout. Stripe handles the amount entry,
+payment, and receipt on its hosted page; this app never sees, stores, or
+processes payment data, and the `stripe` SDK is server-only (it does not ship
+in the client bundle).
+
+The button only renders when the build flag is explicitly enabled, so forks
+and local dev work cleanly without a Stripe account.
+
+### One-time setup in Stripe
+
+1. Sign in at [dashboard.stripe.com](https://dashboard.stripe.com) (use **Test mode** while you wire it up).
+2. Get a secret key: **Developers → API keys → Secret key**.
+3. Create a Product and an open-amount Price:
+   - **Product catalog → Add product**, name it "Cutlist Calculator donation".
+   - Pricing model: **Customer chooses price** (a.k.a. `custom_unit_amount`).
+   - Currency: USD. Minimum: 1.00.
+   - Save and copy the resulting **Price ID** (`price_…`).
+4. (Optional) Enable buyer-localized currency display: **Settings → Adaptive Pricing**.
+
+### Environment variables
+
+| Variable | Where | Purpose |
+|---|---|---|
+| `STRIPE_SECRET_KEY` | Server only (Netlify Functions or All scopes) | Lets the API route create Checkout Sessions. **Never** prefix with `PUBLIC_`. |
+| `STRIPE_DONATION_PRICE_ID` | Server only | The open-amount Price ID from step 3 above. |
+| `PUBLIC_STRIPE_DONATE_ENABLED` | Build-time public, set to the literal string `true` | Controls whether the Support button renders. Anything other than `"true"` (including unset) hides the button entirely. There is no fallback URL. |
+
+In Netlify: **Site configuration → Environment variables → Add a variable** for each. Trigger a redeploy after editing — `PUBLIC_*` vars are baked in at build time.
+
+### Local development
+
+Create `.env.local` (gitignored by default) at the project root:
+
+```sh
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_DONATION_PRICE_ID=price_...
+PUBLIC_STRIPE_DONATE_ENABLED=true
+```
+
+Then `npm run dev` — SvelteKit runs the `+server.ts` route natively in dev, so
+no Netlify CLI is required. Use Stripe's test card `4242 4242 4242 4242`
+(any future expiry, any CVC) on the Checkout page.
+
+To verify the disabled state, drop or comment out `PUBLIC_STRIPE_DONATE_ENABLED`
+and reload — the button should disappear and no `/api/donate` call should
+occur in DevTools → Network.
+
+### Operational notes
+
+- The `/api/donate` endpoint accepts no client-supplied amount, currency, or metadata; configuration lives entirely in env vars and the Stripe Price.
+- There is no webhook handler in v1. Stripe sends the receipt and confirmation directly to the donor.
+- `STRIPE_*` (without the `PUBLIC_` prefix) variables are read via `$env/dynamic/private` and are only available in server modules. Importing them from a client-bundled file would fail the build.
